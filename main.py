@@ -7,6 +7,9 @@ def read_util_ok():
         pass
 
 
+def finish():
+    sys.stdout.write('OK\n')
+    sys.stdout.flush()
 
 
 
@@ -27,5 +30,3 @@ if __name__ == '__main__':
             sys.stdout.write('forward %d %d\n' % (robot_id, line_speed))
             sys.stdout.write('rotate %d %f\n' % (robot_id, angle_speed))
         finish()
-#kfhakjsfhla
-#jiafjdjfa
