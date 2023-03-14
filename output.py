@@ -7,5 +7,7 @@ class output():
         self.buy=[]
         self.sell=[]
         self.destroy=[]
-    def getForward:
-        self.forward.append
+    def getForward(self,id,speed):
+        self.forward.append(["forward "+str(id)+" "+str(speed)])
+        return
+    
