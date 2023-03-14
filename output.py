@@ -1,5 +1,11 @@
 import sys
+"""
+每一帧输出前先使用getxxx（arg）构建输出，必须带上的得有gettime
+最后send方法发送
 
+有问题联系wzd
+
+"""
 class output():
     def __init__(self):
         self.time=0
@@ -34,5 +40,10 @@ class output():
             sys.stdout.write(i)
         for i in self.destroy:
             sys.stdout.write(i)
+        self.forward.clear()
+        self.rotate.clear()
+        self.buy.clear()
+        self.sell.clear()
+        self.destroy.clear()
         sys.stdout.write("OK\n")
         sys.stdout.flush()

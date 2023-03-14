@@ -1,6 +1,51 @@
 import sys
+
+"""
+数据结构随算法而更新
+地图解析，machine中存四个机器位置和方向，
+bench[i]存着第i+1柜台位置
+需要继续做的：柜台状态
+
+联系wzd
+
+"""
 class mapParse():
+
     def __init__(self):
-        self.map=[]
-    def check(self):
-        return
+        self.machine = [[-1, 0,0],[-1, 0,0],[-1, 0, 0],[-1, 0, 0]]                #x,y,方向，方向向右为0，逆时针0-2pai
+        self.bench = [[],[],[],[],[],[],[],[],[]]
+
+    def getMap(self):
+
+        input_line=input()
+        y=100
+        while input_line != "OK":
+            x=0
+            for i in input_line:
+                x+=1
+                if i =='.':
+                    continue
+                elif i=='A':
+                    if self.machine[0][0]== -1:
+                        self.machine[0]=[x,y]
+                    elif self.machine[1][0] == -1:
+                        self.machine[1] = [x, y]
+                    elif self.machine[2][0] == -1:
+                        self.machine[2] = [x, y]
+                    elif self.machine[3][0] == -1:
+                        self.machine[3] = [x, y]
+
+                    #添加一个机器人
+                elif i.isdigit():
+                    self.bench[int(i)-1].append([x,y])
+            y-=1
+
+            input_line = input()
+    def show(self):
+        for i in self.machine:
+            print(i)
+        for i in self.bench:
+            print(i)
+
+
+
