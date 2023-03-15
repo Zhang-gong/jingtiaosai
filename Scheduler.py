@@ -79,6 +79,7 @@ class Scheduler:
         self.ready_tasks = []
 
     def get_map_info(self):
+        print("请输入初始地图：\n")
         self.map_parse = mapParse.mapParse()
         self.sec_map_parse = secParse.secParse(self.map_parse)
         pass
@@ -109,6 +110,7 @@ class Scheduler:
                     task_list.remove(senior_task)
 
     def update(self):
+        print("请输入每一帧的地图信息：\n")
         self.sec_map_parse.getState()
         self.update_task_state()
         self.update_cars_state()
@@ -119,13 +121,17 @@ class Scheduler:
             if not c.is_busy:
                 self.get_nearest_available_bench(c)
 
-        pass
+        for c in self.cars:
+            pass
 
     def get_nearest_available_bench(self, c):
         """
+        先获得车的位置，通过下标
         获得离小车最近的，可以拿货的工作台
         :return:
         """
+        c.x, c.y = self.sec_map_parse.getCar_id_loc(c.carid)
+        print(c.x + " " + c.y)
         if len(self.ready_tasks) > 0:
             tmp_des = self.ready_tasks[0]
             c.des_x, c.des_y = tmp_des.x, tmp_des.y
@@ -135,14 +141,25 @@ class Scheduler:
         for task_list in self.task_list_manager:
             nearest = 100000.0
             choose = 0
-            for primary_task in task_list:
+            for primary_task in task_list.primary_task_list:
                 """
                 获得最近的任务，通过小车坐标, 任务的类型 ，得到该任务中离小车最近的点，比较所有可以的任务，拿最近的那个
                 """
-                res_list = self.sec_map_parse.getBench_closest_xy_type_id(c.x, c.y, primary_task.from_where)
+                res_list = self.sec_map_parse.getBench_closest_xy_type_id(float(c.x), float(c.y), primary_task.from_where)
+                print("primary_task from : " + str(primary_task.from_where) + " " + res_list[0][1])
+                if nearest > float(res_list[0][1]):
+                    nearest = float(res_list[0][1])
+                    choose = primary_task
+                    c.des_x, c.des_y = self.sec_map_parse.getBench_id_loc(int(res_list[0][0]))
+            task_list.primary_task_list.remove(choose)
+            print("choose :" + str(choose.from_where))
+            c.is_busy = True
 
 
 sch = Scheduler()
+sch.get_map_info()
+sch.update()
+
 for s in sch.cars:
     print(s.carid)
 tl2 = TaskList()
