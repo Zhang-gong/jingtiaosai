@@ -1,19 +1,21 @@
-import sys,numpy
-"""
+import numpy
+import sys
 
-
-- 动一辆车，1买7卖：搞定输出输入模块
-  - 能跑
-  - 模块化
-    - 你去哪 arg:no type x y state
-    - 预置下一点
-      -  
-    - 角速度和线速度
-      -  
-    - 阻力，全局参数修改
-    - 碰撞
-  
-"""
 class car():
-  def __init__(self):
-      self.x==0
+    def __init__(self):
+        self.carid=0
+        self.benchid=-1
+        self.goods=-1
+        self.tk=1
+        self.ck=1
+        self.wspeed=0
+        self.speed=0
+        self.toward=0
+        self.x=0
+        self.y=0
+
+    def destination(self,no,type,x,y):
+        pass
+
+    def updateState(self):
+        pass
