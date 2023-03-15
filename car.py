@@ -2,8 +2,8 @@ import numpy
 import sys
 
 class car():
-    def __init__(self):
-        self.carid=0
+    def __init__(self,carId):
+        self.carid=carId
         self.benchid=-1
         self.goods=-1
         self.tk=1
