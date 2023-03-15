@@ -1,9 +1,9 @@
 import mapParse
 import time
+import  secParse
 t=time.time()
-a=mapParse.mapParse()
-a.getMap()
+a=secParse.secParse()
+a.getState()
+
 
 a.show()
-
-print(time.time()-t)
