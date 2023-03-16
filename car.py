@@ -4,7 +4,7 @@ import sys
 
 class car:
     def __init__(self, car_id):
-        self.inbench=0.2
+        self.inbench=0.002
         self.rotateLimitAc=0.13#加减速临界角度
         self.rotateLimitGo = 0.1# 启动临界角度
         self.to0speed=0.75#一针到0的速度
@@ -77,11 +77,11 @@ class car:
             dT=-(2*np.pi-dT)
         #角度修正
         #负的目标需要我逆时针转故返回正
-        print(dT)
         if abs(dT)<self.rotateLimitGo:
             self.fowardFlag=True
         else:
-            self.fowardFlag=False
+            pass
+            #self.fowardFlag=False
 
         if dT>self.rotateLimitAc :
             return -np.pi
@@ -90,7 +90,7 @@ class car:
         elif dT>self.stopRotate:
             return -np.sign(dT)*self.to0speed
         else:
-            return 0
+            return dT
 
 
     def straight(self):

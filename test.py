@@ -4,32 +4,13 @@ import secParse
 import numpy as np
 import car
 import output
-n=100
-m=100
-arr1 = (np.arange(n).reshape(n, 1) * 2) * 0.25 * np.ones((1, m))
-arr2 = (np.arange(m).reshape(1, m) * 2) * 0.25 * np.ones((n, 1))
-map=np.sqrt(arr1 ** 2 + arr2 ** 2)
 
 
-desx=2
-desy=4
+a = mapParse.mapParse()
+b = secParse.secParse(a)
+b.getState()
 
-n=3.14/50
-
-
-car0 = car.car(0)
-car0.speed_y=0
-car0.toward=0+n*36+(0.75+0.5+0.25)*n
-car0.x=3
-car0.y=3
-
-
-dx = int(abs(desx - car0.x) * 2)
-dy = int(abs(desy - car0.y) * 2)
-
-
-print(car0.destination(desx,desy,map[dx][dy]))
-
+print(b.getBench_closest_xy_type_id(3.25,2.25,-1))
 # outControl = output.output()
 # a = mapParse.mapParse()
 # b = secParse.secParse(a)

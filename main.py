@@ -7,10 +7,17 @@ import numpy as np
 import car
 import output
 from Scheduler import Scheduler
-
+import win32api
 if __name__ == '__main__':
 
     # 初始化
+    # pid = win32api.GetCurrentProcessId()
+    # with open('1.txt', 'w') as f:
+    #     # 获取当前进程的PID
+    #     # 将PID写入文件中
+    #     f.write(str(pid))
+    #     f.close()
+    # time.sleep(18)  # 用于查看pid附加进程
     scheduler = Scheduler()
     scheduler.get_map_info()
     # outControl = output.output()
@@ -20,7 +27,7 @@ if __name__ == '__main__':
     #car1 = car.car(1)
     #car2 = car.car(2)
     #car3 = car.car(3)
-    #sys.stdout.write("OK\n")
+    sys.stdout.write("OK\n")
     # 第一帧
     while True:
         #b.getState()
@@ -32,7 +39,7 @@ if __name__ == '__main__':
 
         # 做决策
         # 比如0车去1,1买2  3车去3,5卖6
-        #outControl.putTime(b.time)
+        #
 
         #speed, wspeed, lasttime = car0.destination(1, 1)
         #outControl.putForward(0, speed)
