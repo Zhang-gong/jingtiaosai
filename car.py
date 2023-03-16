@@ -1,6 +1,5 @@
 import numpy
 import sys
-import secParse
 
 
 class car:
@@ -11,6 +10,8 @@ class car:
         self.tk = 1
         self.ck = 1
         self.wspeed = 0
+        self.speed = 0
+        self.need_toward = 0
         self.speed_x = 0
         self.speed_y=0
         self.toward = 0
@@ -20,6 +21,8 @@ class car:
         self.is_busy = False
         self.des_x = 0
         self.des_y = 0
+        self.is_carrying = False
+        #self.carrying_weight =
     def getCarState(self,carState,is_busy):
 
         self.benchid = int(carState[0])
@@ -52,8 +55,12 @@ class car:
 
         speed=self.straight()
         wspped=self.rotate()
-        return speed,wspped
+        lasttime=self.lastTime()
+        return speed,wspped,lasttime
     def rotate(self):
         return 0
     def straight(self):
+        return 0
+
+    def lastTime(self):
         return 0

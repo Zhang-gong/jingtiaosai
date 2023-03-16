@@ -1,3 +1,5 @@
+import math
+import sys
 import car
 import mapParse
 import secParse
@@ -69,6 +71,19 @@ class TaskList:
 """
 
 
+def cul_car_target_toward(c):
+
+    vec_x = c.des_x - c.x
+    vec_y = c.des_y - c.y
+    vec_len = math.sqrt(vec_x * vec_x + vec_y * vec_y)
+    vec_x /= vec_len
+    # vec_y /= vec_len
+    """和x = 1, y = 0的单位向量求夹角"""
+    angle_cos = vec_x
+    """返回angle_cos的角度值"""
+    return math.acos(angle_cos)
+
+
 class Scheduler:
     def __init__(self):
         self.cars = [car.car(i) for i in range(4)]
@@ -121,8 +136,24 @@ class Scheduler:
             if not c.is_busy:
                 self.get_nearest_available_bench(c)
 
+        self.update_toward()
+        self.update_forward()
+
+    def update_forward(self):
+        """检测和目标点的距离，在一定范围外，加速，内，减速"""
         for c in self.cars:
-            pass
+            x = c.des_x - c.x
+            y = c.des_y - c.y
+            distance_to_des = x*x + y*y
+
+
+    def update_toward(self):
+        for c in self.cars:
+            current_toward = self.sec_map_parse.getCar_id_toward(c.carid)
+            target_toward = cul_car_target_toward(c)
+            angle_need = (target_toward - float(current_toward)) % math.pi
+            c.need_toward = angle_need
+            sys.stdout.write('rotate %d %f\n' % (c.carid, angle_need))
 
     def get_nearest_available_bench(self, c):
         """
@@ -132,6 +163,8 @@ class Scheduler:
         """
         c.x, c.y = self.sec_map_parse.getCar_id_loc(c.carid)
         print(c.x + " " + c.y)
+        c.x = float(c.x)
+        c.y = float(c.y)
         if len(self.ready_tasks) > 0:
             tmp_des = self.ready_tasks[0]
             c.des_x, c.des_y = tmp_des.x, tmp_des.y
@@ -145,12 +178,14 @@ class Scheduler:
                 """
                 获得最近的任务，通过小车坐标, 任务的类型 ，得到该任务中离小车最近的点，比较所有可以的任务，拿最近的那个
                 """
-                res_list = self.sec_map_parse.getBench_closest_xy_type_id(float(c.x), float(c.y), primary_task.from_where)
+                res_list = self.sec_map_parse.getBench_closest_xy_type_id(c.x, c.y, primary_task.from_where)
                 print("primary_task from : " + str(primary_task.from_where) + " " + res_list[0][1])
                 if nearest > float(res_list[0][1]):
                     nearest = float(res_list[0][1])
                     choose = primary_task
                     c.des_x, c.des_y = self.sec_map_parse.getBench_id_loc(int(res_list[0][0]))
+                    c.des_x = float(c.des_x)
+                    c.des_y = float(c.des_y)
             task_list.primary_task_list.remove(choose)
             print("choose :" + str(choose.from_where))
             c.is_busy = True

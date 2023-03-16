@@ -24,12 +24,12 @@ car3.getState(b.carState[3])
 #比如0车去1,1买2  3车去3,5卖6
 outControl.putTime(b.time)
 
-speed,wspeed=car0.destination(2,1,1)
+speed,wspeed,lasttime=car0.destination(2,1,1)
 outControl.putForward(0,speed)
 outControl.putRotate(0,wspeed)
 outControl.putBuy(0)
 
-speed,wspeed=car3.destination(6,3,5)
+speed,wspeed,lasttime=car3.destination(6,3,5)
 outControl.putForward(3,speed)
 outControl.putRotate(3,wspeed)
 outControl.putSell(3)
