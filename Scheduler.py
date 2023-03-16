@@ -58,19 +58,28 @@ class Scheduler:
         """默认从1，2，3开始的任务都是可以直接获取的，所以这个列表只存4，5，6，7开始的任务"""
         self.priority_tasks = []
         self.cars_busy_state = [False, False, False, False]
-        self.cars_task_list = []
+        self.cars_task_list = [[], [], [], []]
         self.outControl = output.output()
+
+    def update(self):
+        print("请输入每一帧的地图信息：\n")
+        self.sec_map_parse.getState()
+        self.update_car_info()
+        self.update_task_state()
+        self.task_distribute()
+        self.update_cars_state()
+        self.outControl.send()
 
     def get_map_info(self):
         print("请输入初始地图：\n")
         self.map_parse = mapParse.mapParse()
         self.sec_map_parse = secParse.secParse(self.map_parse)
-        pass
 
     def update_task_list_manager(self):
         if len(self.task_list_manager) == 0:
             t = TaskList()
             self.task_list_manager.append(t)
+            print("new task_list_manager")
 
         for task_list in self.task_list_manager:
             if len(task_list.senior_task_list) == 0 and len(task_list.primary_task_list) == 0:
@@ -97,7 +106,7 @@ class Scheduler:
                 """通过task.from查询所有该种类的工作台中是否有可以执行的（== 0 or <= 50），有就加入队列中"""
                 res_list = self.sec_map_parse.getBench_lasted_type_id(senior_task.from_where)
                 for bench_state in res_list:
-                    if 50 >= bench_state[1] >= 0:
+                    if 50 >= int(bench_state[1]) >= 0:
                         """通过bench_id获得bench_location"""
                         x, y = self.sec_map_parse.getBench_id_loc(bench_state[0])
                         tmp_task_1 = ready_task(senior_task.from_where, float(x), float(y), 0)
@@ -132,12 +141,9 @@ class Scheduler:
             if not self.cars_busy_state[i]:
                 self.get_nearest_available_bench(self.cars[i])
 
-    def update(self):
-        print("请输入每一帧的地图信息：\n")
-        self.sec_map_parse.getState()
-        self.update_task_state()
-        self.task_distribute()
-        self.update_cars_state()
+    def update_car_info(self):
+        for i in range(4):
+            self.cars[i].getState(self.sec_map_parse.carState[i])
 
     def update_cars_state(self):
         for c in self.cars:
@@ -149,17 +155,16 @@ class Scheduler:
                 action = c_task.buy_or_sell
                 if action == 0:
                     self.outControl.putBuy(c.carid)
-                    self.cars_task_list[c_task].pop(0)
+                    self.cars_task_list[c.carid].pop(0)
                 else:
                     self.outControl.putSell(c.carid)
-                    self.cars_task_list[c_task].pop(0)
+                    self.cars_task_list[c.carid].pop(0)
                     self.cars_busy_state[c.carid] = False
-
+            # print("the car state is %d" % self.cars_busy_state[c.carid])
             if self.cars_busy_state[c.carid]:
                 c_task = self.cars_task_list[c.carid][0]
                 speed, wspped, lasttime = c.destination(c_task.x, c_task.y)
-                self.outControl.putForward(3, speed)
-                self.outControl.putRotate(3, wspeed)
+                self.outControl.putForward(c.carid, speed)
 
     def update_forward(self):
         """检测和目标点的距离，在一定范围外，加速，内，减速"""
@@ -181,8 +186,8 @@ class Scheduler:
         des_list = self.sec_map_parse.getBench_closest_xy_type_id(x, y, task.des)
         for des in des_list:
             des_id = des[0]
-            if not self.sec_map_parse.getBench_id_goodnum_goodState(des_id, task.from_where):
-                des_x, des_y = self.sec_map_parse.getBench_id_loc(des_id)
+            if not self.sec_map_parse.getBench_id_goodnum_goodState(int(des_id), task.from_where):
+                des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
                 tmp_task_2 = ready_task(task.des, float(des_x), float(des_y), 1)
                 return tmp_task_2
 
@@ -194,7 +199,7 @@ class Scheduler:
         获得离小车最近的，可以拿货的工作台
         :return:
         """
-        print(c.x + " " + c.y)
+        # print(c.x + " " + c.y)
         for task_list in self.task_list_manager:
             nearest = 100000.0
             choose = 0
@@ -209,15 +214,20 @@ class Scheduler:
                     nearest = float(res_list[0][1])
                     choose = primary_task
                     tmp_task_1.x, tmp_task_1.y = self.sec_map_parse.getBench_id_loc(int(res_list[0][0]))
-            task_list.primary_task_list.remove(choose)
+            if choose == 0:
+                continue
             tmp_task_1.x = float(tmp_task_1.x)
             tmp_task_1.y = float(tmp_task_1.y)
             tmp_task_1.bench_type = choose.from_where
             print("choose :" + str(choose.from_where))
             tmp_task_2 = self.get_des_task(tmp_task_1.x, tmp_task_1.y, choose)
             if tmp_task_2 is None:
+                print("Error,can't find next task, push_back task_1")
                 continue
             else:
+                task_list.primary_task_list.remove(choose)
                 self.cars_task_list[c.carid].append(tmp_task_1)
                 self.cars_task_list[c.carid].append(tmp_task_2)
+                print('append into car_task_list[%d] two tasks' % c.carid)
+                self.cars_busy_state[c.carid] = True
                 break
