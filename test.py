@@ -2,44 +2,38 @@ import mapParse
 import time
 import secParse
 import numpy as np
-
+import car
+import output
+#初始化
+outControl = output.output()
 a = mapParse.mapParse()
 b = secParse.secParse(a)
+car0=car.car(0)
+car1=car.car(1)
+car2=car.car(2)
+car3=car.car(3)
+
+#第一帧
 b.getState()
+car0.getState(b.carState[0])#可能是第一行把(maybe
+car1.getState(b.carState[1])
+car2.getState(b.carState[2])
+car3.getState(b.carState[3])
 
-print(b.getCar_id_wspeed(0))
-print(b.getBench_closest_xy_type_id(25, 42, -1))
-print(b.getBench_closest_xy_type_id(25, 42, 6))
-print(b.getBench_lasted_type_id(6))
-print(b.getBench_lasted_type_id(-1))
-print(b.getBench_id_goodnum_goodState(3, 4))
-print(b.getBench_id_goodState(3))
-print(b.getCar_closest_xy_id(15, 36.7))
-print(b.getCar_closest_xy_id(46.25, 42.25))
+#做决策
+#比如0车去1,1买2  3车去3,5卖6
+outControl.putTime(b.time)
 
-# a=secParse.secParse()
-# print(a.mapDistance)
-# a.getState()
-# print(type(a.getCar_id_type(1)))
-#
+speed,wspeed=car0.destination(2,1,1)
+outControl.putForward(0,speed)
+outControl.putRotate(0,wspeed)
+outControl.putBuy(0)
+
+speed,wspeed=car3.destination(6,3,5)
+outControl.putForward(3,speed)
+outControl.putRotate(3,wspeed)
+outControl.putSell(3)
 
 
-"""
-t=time.time()
-
-print(a.getBench_id_type(3))
-print(a.getBench_id_loc(3))
-print(a.getBench_id_last(3))
-print(a.getBench_id_goodState(3))
-print(a.getBench_id_outState(3))
-
-print(a.getCar_id_benchid(0))
-print(a.getCar_id_type(0))
-print(a.getCar_id_tf(0))
-print(a.getCar_id_cf(0))
-print(a.getCar_id_wspeed(0))
-print(a.getCar_id_speed(0))
-print(a.getCar_id_toward(0))
-print(a.getCar_id_loc(0))
-
-"""
+outControl.send()
+#第一帧结束
