@@ -17,10 +17,11 @@ if __name__ == '__main__':
     car1 = car.car(1)
     car2 = car.car(2)
     car3 = car.car(3)
-
+    sys.stdout.write("OK\n")
     # 第一帧
     while True:
         b.getState()
+
         car0.getState(b.carState[0])  # 可能是第一行把(maybe
         car1.getState(b.carState[1])
         car2.getState(b.carState[2])

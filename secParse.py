@@ -25,8 +25,13 @@ class secParse():
         self.map = mapInstance.mapDistance
 
     def getState(self):
+        self.benchState = np.empty((0, 6))
+        self.carState = np.empty((0, 10))
 
-        input_line = input()
+        try:
+            input_line = input()
+        except:
+            exit(0)
         while len(input_line) <= 5:                             #测试用
             input_line = input()
         self.time, self.money = input_line.split(" ")
@@ -43,6 +48,7 @@ class secParse():
             input_line = input()
         while input_line != "OK":
             input_line = input()
+        sys.stdin.flush()
 
     def getBench_id_loc(self, id):
         """
