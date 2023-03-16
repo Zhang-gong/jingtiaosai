@@ -14,19 +14,19 @@ class output():
         self.buy=[]
         self.sell=[]
         self.destroy=[]
-    def getTime(self,time):
+    def putTime(self,time):
         self.time=time
-    def getForward(self,id,speed):
+    def putForward(self,id,speed):
         self.forward.append("forward "+str(id)+" "+str(speed)+"\n")
-    def getRotate(self,id,speed):
+    def putRotate(self,id,speed):
         self.rotate.append("rotate "+str(id)+" "+str(speed)+"\n")
-    def getBuy(self,id):
+    def putBuy(self,id):
         self.buy.append("buy "+str(id)+"\n")
 
-    def getSell(self, id):
+    def putSell(self, id):
         self.sell.append("sell " + str(id) + "\n")
 
-    def getDestroy(self, id):
+    def putDestroy(self, id):
         self.destroy.append("destroy " + str(id) + "\n")
     def send(self):
         sys.stdout.write(str(self.time)+"\n")
