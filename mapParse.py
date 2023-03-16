@@ -25,7 +25,6 @@ class mapParse():
 
 
     def getMap(self):
-
             input_line=input()
             y=100
             while input_line != "OK":
@@ -50,11 +49,11 @@ class mapParse():
                 y-=1
 
                 input_line = input()
-    def show(self):
-        for i in self.machine:
-            print(i)
-        for i in self.bench:
-            print(i)
+    # def show(self):
+    #     for i in self.machine:
+    #         print(i)
+    #     for i in self.bench:
+    #         print(i)
 
 
 

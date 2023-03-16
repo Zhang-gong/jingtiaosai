@@ -77,7 +77,7 @@ class car:
             dT=-(2*np.pi-dT)
         #角度修正
         #负的目标需要我逆时针转故返回正
-        print(dT)
+       # print(dT)
         if abs(dT)<self.rotateLimitGo:
             self.fowardFlag=True
         else:
