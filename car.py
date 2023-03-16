@@ -35,7 +35,7 @@ class car:
         self.x = float(carState[8])
         self.y = float(carState[9])
 
-    def destination(self, x, y):
+    def destination(self, x, y, distance):
         """
         1.0 先转到直线(很小角度)再冲,反回需要打的速度
         :param type:
