@@ -62,7 +62,6 @@ class Scheduler:
         self.outControl = output.output()
 
     def update(self):
-        print("请输入每一帧的地图信息：\n")
         self.sec_map_parse.getState()
         self.update_car_info()
         self.update_task_state()
@@ -71,7 +70,6 @@ class Scheduler:
         self.outControl.send()
 
     def get_map_info(self):
-        print("请输入初始地图：\n")
         self.map_parse = mapParse.mapParse()
         self.sec_map_parse = secParse.secParse(self.map_parse)
 
@@ -79,7 +77,6 @@ class Scheduler:
         if len(self.task_list_manager) == 0:
             t = TaskList()
             self.task_list_manager.append(t)
-            print("new task_list_manager")
 
         for task_list in self.task_list_manager:
             if len(task_list.senior_task_list) == 0 and len(task_list.primary_task_list) == 0:
@@ -160,7 +157,6 @@ class Scheduler:
                     self.outControl.putSell(c.carid)
                     self.cars_task_list[c.carid].pop(0)
                     self.cars_busy_state[c.carid] = False
-            # print("the car state is %d" % self.cars_busy_state[c.carid])
             if self.cars_busy_state[c.carid]:
                 c_task = self.cars_task_list[c.carid][0]
                 speed, wspped, lasttime = c.destination(c_task.x, c_task.y)
@@ -199,7 +195,6 @@ class Scheduler:
         获得离小车最近的，可以拿货的工作台
         :return:
         """
-        # print(c.x + " " + c.y)
         for task_list in self.task_list_manager:
             nearest = 100000.0
             choose = 0
@@ -209,7 +204,6 @@ class Scheduler:
                 获得最近的任务，通过小车坐标, 任务的类型 ，得到该任务中离小车最近的点，比较所有可以的任务，拿最近的那个
                 """
                 res_list = self.sec_map_parse.getBench_closest_xy_type_id(c.x, c.y, primary_task.from_where)
-                print("primary_task from : " + str(primary_task.from_where) + " " + res_list[0][1])
                 if nearest > float(res_list[0][1]):
                     nearest = float(res_list[0][1])
                     choose = primary_task
@@ -219,15 +213,12 @@ class Scheduler:
             tmp_task_1.x = float(tmp_task_1.x)
             tmp_task_1.y = float(tmp_task_1.y)
             tmp_task_1.bench_type = choose.from_where
-            print("choose :" + str(choose.from_where))
             tmp_task_2 = self.get_des_task(tmp_task_1.x, tmp_task_1.y, choose)
             if tmp_task_2 is None:
-                print("Error,can't find next task, push_back task_1")
                 continue
             else:
                 task_list.primary_task_list.remove(choose)
                 self.cars_task_list[c.carid].append(tmp_task_1)
                 self.cars_task_list[c.carid].append(tmp_task_2)
-                print('append into car_task_list[%d] two tasks' % c.carid)
                 self.cars_busy_state[c.carid] = True
                 break
