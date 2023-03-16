@@ -165,6 +165,11 @@ class Scheduler:
             dx = int(abs(sub_x)) * 2
             dy = int(abs(sub_y)) * 2
             distance = self.sec_map_parse.map[dx][dy]
+            if self.cars_busy_state[c.carid]:
+                c_task = self.cars_task_list[c.carid][0]
+                speed, wspeed, lasttime = c.destination(c_task.x, c_task.y, distance)
+                self.outControl.putForward(c.carid, speed)
+                self.outControl.putRotate(c.carid, wspeed)
             """是否在目标点"""
             if (sub_x * sub_x + sub_y * sub_y) < 0.16:
                 action = c_task.buy_or_sell
@@ -176,11 +181,7 @@ class Scheduler:
                     self.cars_task_list[c.carid].pop(0)
                     self.cars_busy_state[c.carid] = False
             # print("the car state is %d" % self.cars_busy_state[c.carid])
-            if self.cars_busy_state[c.carid]:
-                c_task = self.cars_task_list[c.carid][0]
-                speed, wspeed, lasttime = c.destination(c_task.x, c_task.y, distance)
-                self.outControl.putForward(c.carid, speed)
-                self.outControl.putRotate(c.carid, wspeed)
+
                 # self.outControl.putForward(c.carid, lasttime)
                 #print("car %d des is x = %f y = %f" % (c.carid, self.cars_task_list[c.carid][0].x,
                 #self.cars_task_list[c.carid][0].y))
