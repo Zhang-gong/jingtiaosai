@@ -1,32 +1,43 @@
 #!/bin/bash
 import sys
-
-
-def read_util_ok():
-    while input() != "OK":
-        pass
-
-
-def finish():
-    sys.stdout.write('OK\n')
-    sys.stdout.flush()
-
-
+import mapParse
+import time
+import secParse
+import numpy as np
+import car
+import output
 
 if __name__ == '__main__':
-    read_util_ok()
-    finish()
-    while True:
-        line = sys.stdin.readline()
-        if not line:
-            break
-        parts = line.split(' ')
-        frame_id = int(parts[0])
-        read_util_ok()
 
-        sys.stdout.write('%d\n' % frame_id)
-        line_speed, angle_speed = 3, 1.5
-        for robot_id in range(4):
-            sys.stdout.write('forward %d %d\n' % (robot_id, line_speed))
-            sys.stdout.write('rotate %d %f\n' % (robot_id, angle_speed))
-        finish()
+    # 初始化
+    outControl = output.output()
+    a = mapParse.mapParse()
+    b = secParse.secParse(a)
+    car0 = car.car(0)
+    car1 = car.car(1)
+    car2 = car.car(2)
+    car3 = car.car(3)
+
+    # 第一帧
+    while True:
+        b.getState()
+        car0.getState(b.carState[0])  # 可能是第一行把(maybe
+        car1.getState(b.carState[1])
+        car2.getState(b.carState[2])
+        car3.getState(b.carState[3])
+
+        # 做决策
+        # 比如0车去1,1买2  3车去3,5卖6
+        outControl.putTime(b.time)
+
+        speed, wspeed, lasttime = car0.destination(1, 1)
+        outControl.putForward(0, speed)
+        outControl.putRotate(0, wspeed)
+        outControl.putBuy(0)
+
+        speed, wspeed, lasttime = car3.destination(3, 5)
+        outControl.putForward(3, speed)
+        outControl.putRotate(3, wspeed)
+        outControl.putSell(3)
+
+        outControl.send()

@@ -2,8 +2,9 @@ import numpy
 import sys
 
 
+
 class car:
-    def __init__(self, car_id):
+    def __init__(self, car_id,):
         self.carid = car_id
         self.benchid = -1
         self.goods = -1
@@ -22,8 +23,7 @@ class car:
         self.des_x = 0
         self.des_y = 0
         self.is_carrying = False
-        #self.carrying_weight =
-    def getCarState(self,carState,is_busy):
+    def getState(self,carState):
 
         self.benchid = int(carState[0])
         self.goods =  int(carState[1])
@@ -36,12 +36,12 @@ class car:
         self.x =  float(carState[8])
         self.y =  float(carState[9])
 
-        self.is_busy=is_busy
 
 
 
 
-    def destination(self, type, x, y):
+
+    def destination(self, x, y):
 
         """
         1.0 先转到直线(很小角度)再冲,反回需要打的速度

@@ -9,6 +9,7 @@ get使用方法
 getBench_closest_xy_type_id
 getcar或者getbench获取谁的信息，中间的为输入参数，最后的id为返回。详细输入输出见注释
 
+留存了一个粗糙的测试用
 """
 
 
@@ -26,9 +27,8 @@ class secParse():
     def getState(self):
 
         input_line = input()
-        while input_line == "\n":
+        while len(input_line) <= 5:                             #测试用
             input_line = input()
-        print(input_line)
         self.time, self.money = input_line.split(" ")
         input_line = input()
         benchNum = int(input_line)
