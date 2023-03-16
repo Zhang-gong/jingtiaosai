@@ -34,5 +34,6 @@ outControl.putForward(3,speed)
 outControl.putRotate(3,wspeed)
 outControl.putSell(3)
 
+
 outControl.send()
 #第一帧结束
