@@ -1,5 +1,7 @@
 import math
 import sys
+import time
+from crashControl import crashControl
 import car
 import mapParse
 import output
@@ -70,7 +72,8 @@ class Scheduler:
             for task_list in self.task_list_manager:
                 f.write("primary list left:\n")
                 for primart_task_list in task_list.primary_task_list:
-                    f.write("primary_task_list from: %d to %d\n" % (primart_task_list.from_where, primart_task_list.des))
+                    f.write(
+                        "primary_task_list from: %d to %d\n" % (primart_task_list.from_where, primart_task_list.des))
                 f.write("senior list left:\n")
                 for senior_task_list in task_list.senior_task_list:
                     f.write("senior_task_list from: %d to %d\n" % (senior_task_list.from_where, senior_task_list.des))
@@ -99,7 +102,12 @@ class Scheduler:
         self.des_has_selected = []
         self.start_bench_type = []
         """True为算法，False为手动"""
-        self.mode = True
+        self.mode = False
+
+        self.crashControler = crashControl()
+
+        self.t_car1 = [[5, 1], [25, 25], [49, 4]]
+        self.t_car2 = [[21, 10], [20, 2], [30, 3]]
 
     def update(self):
         # ("请输入每一帧的地图信息：\n")
@@ -115,14 +123,38 @@ class Scheduler:
         self.outControl.send()
 
     def hand_input_test(self):
-        tmp_task_0 = ready_task(bench_type=0, x=5, y=5, buy_or_sell=0, bench_id=0)
-        tmp_task_1 = ready_task(bench_type=0, x=10, y=10, buy_or_sell=1, bench_id=0)
-        tmp_task_2 = ready_task(bench_type=0, x=15, y=15, buy_or_sell=0, bench_id=0)
-        tmp_task_3 = ready_task(bench_type=0, x=20, y=20, buy_or_sell=1, bench_id=0)
-        tmp_task_4 = ready_task(bench_type=0, x=25, y=25, buy_or_sell=0, bench_id=0)
-        tmp_task_5 = ready_task(bench_type=0, x=35, y=35, buy_or_sell=1, bench_id=0)
+        if len(self.t_car1) > 0:
+            x_1 = self.t_car1[0][0]
+            y_1 = self.t_car1[0][1]
+            c = self.cars[0]
+            sub_x = c.x - x_1
+            sub_y = c.y - y_1
+            speed, wspeed, last_time = c.destination(x_1, y_1, distance=1000)
+            self.crashControler.putCarState(self.sec_map_parse.carState[:, 4:10])
+            self.crashControler.putSportState(0, speed, wspeed)
+            self.crashControler.judgeAndModify()
+            speed, wspeed = self.crashControler.getSportStateAter(0)  # 返回第零个车的修改
+            self.outControl.putForward(c.carid, speed)
+            self.outControl.putRotate(c.carid, wspeed)
 
-        pass
+            if (sub_x * sub_x + sub_y * sub_y) < 0.1:
+                self.t_car1.pop(0)
+
+        if len(self.t_car2) > 0:
+            x_2 = self.t_car2[0][0]
+            y_2 = self.t_car2[0][1]
+            c = self.cars[1]
+            sub_x = c.x - x_2
+            sub_y = c.y - y_2
+            speed, wspeed, last_time = c.destination(x_2, y_2, distance=1000)
+            self.crashControler.putCarState(self.sec_map_parse.carState[:, 4:10])
+            self.crashControler.putSportState(1, speed, wspeed)
+            self.crashControler.judgeAndModify()
+            speed, wspeed = self.crashControler.getSportStateAter(1)  # 返回第零个车的修改
+            self.outControl.putForward(c.carid, speed)
+            self.outControl.putRotate(c.carid, wspeed)
+            if (sub_x * sub_x + sub_y * sub_y) < 0.1:
+                self.t_car2.pop(0)
 
     def get_map_info(self):
         # if os.path.exists('Log/data_log.txt'):
@@ -252,13 +284,14 @@ class Scheduler:
             # print("car %d des is x = %f y = %f" % (c.carid, self.cars_task_list[c.carid][0].x,
             #    self.cars_task_list[c.carid][0].y))
 
-    def get_des_task(self,tmp_task, task):
+    def get_des_task(self, tmp_task, task):
         tmp_task_2 = None
         des_list = self.sec_map_parse.getBench_closest_xy_type_id(tmp_task.x, tmp_task.y, task.des)
         for des in des_list:
             des_id = des[0]
             """获得对应卖的任务,找最近的，缺货的对应工作台"""
             if not self.sec_map_parse.getBench_id_goodnum_goodState(int(des_id), task.from_where):
+                #
                 if self.des_has_selected.count(des_id) > 0 and self.start_bench_type.count(tmp_task.bench_type) > 0:
                     continue
                 des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
