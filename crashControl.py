@@ -4,7 +4,7 @@ import numpy as np
 matrix = np.random.rand(4, 10)
 a=crashControl.crashControl()
 
-a.putCarState(matrix[4:10])
+a.putCarState(matrix[:,4:10])
 for i in range(4):
     #调用destination获得两个速度
     speed=i
