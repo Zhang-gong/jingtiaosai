@@ -4,9 +4,9 @@ import sys
 
 class car:
     def __init__(self, car_id):
-        self.inbench=0.002
+        self.inbench=0.0002
         self.rotateLimitAc=0.13#0.13#加减速临界角度
-        self.rotateLimitGo = 0.26# 启动临界角度
+        self.rotateLimitGo = 1.25# 启动临界角度
         self.to0speed=0.75#一针到0的速度
         self.stopRotate=0.17#停止临界
         #常量区
