@@ -214,7 +214,9 @@ class Scheduler:
                 self.outControl.putRotate(c.carid, wspeed)
             """是否在目标点"""
             if (sub_x * sub_x + sub_y * sub_y) < 0.16:
-                # self.has_selected.pop((c_task.x, c_task.y))
+                if self.has_selected.count((c_task.x, c_task.y)) > 0:
+                    self.has_selected.remove((c_task.x, c_task.y))
+
                 action = c_task.buy_or_sell
                 if action == 0:
                     self.outControl.putBuy(c.carid)
