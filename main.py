@@ -8,7 +8,7 @@ import car
 import output
 from Scheduler import Scheduler
 
-import win32api#win平台get pid,linux请换平台
+# import win32api#win平台get pid,linux请换平台
 """
 #以下为linux平台的getpid方法
 import os
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # 初始化
 
 
-    pid = win32api.GetCurrentProcessId()
+    # pid = win32api.GetCurrentProcessId()
     #with open('1.txt', 'w') as f:
     #    # 获取当前进程的PID
     #    # 将PID写入文件中
