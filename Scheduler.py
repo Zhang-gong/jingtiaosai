@@ -51,6 +51,8 @@ def cul_car_target_toward(c):
 
 class Scheduler:
     def __init__(self):
+        self.f = open("./out.txt", "w")
+
         self.cars = [car.car(i) for i in range(4)]
         self.task_list_manager = []
         self.sec_map_parse = None
@@ -167,6 +169,10 @@ class Scheduler:
             distance = self.sec_map_parse.map[dx][dy]
             if self.cars_busy_state[c.carid]:
                 c_task = self.cars_task_list[c.carid][0]
+                s=    str(self.sec_map_parse.time)+" "+str(c_task.x)+" "+str(c_task.y)+" "+str(c.x)+" "+str(c.y)+" "+str(dx)+" "+str(dy)+" "+str(distance)+"\n"
+                self.f.write(s)
+                if self.sec_map_parse.time==5000:
+                    self.f.close()
                 speed, wspeed, lasttime = c.destination(c_task.x, c_task.y, distance)
                 self.outControl.putForward(c.carid, speed)
                 self.outControl.putRotate(c.carid, wspeed)

@@ -248,7 +248,7 @@ class secParse():
             list.append(self.map[dx][dy])
 
         arr = self.carState
-        arr = np.insert(arr, 0, values=np.arange(self.carState.shape[0]) + 1, axis=1)
+        arr = np.insert(arr, 0, values=np.arange(self.carState.shape[0]), axis=1)
         arr = np.insert(arr, 1, values=np.array(list), axis=1)
 
         arr_sorted = arr[arr[:, 1].argsort()]

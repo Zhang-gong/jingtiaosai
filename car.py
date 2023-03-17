@@ -5,8 +5,8 @@ import sys
 class car:
     def __init__(self, car_id):
         self.inbench=0.002
-        self.rotateLimitAc=0.13#加减速临界角度
-        self.rotateLimitGo = 0.1# 启动临界角度
+        self.rotateLimitAc=0.13#0.13#加减速临界角度
+        self.rotateLimitGo = 0.26# 启动临界角度
         self.to0speed=0.75#一针到0的速度
         self.stopRotate=0.17#停止临界
         #常量区
@@ -80,13 +80,12 @@ class car:
        # print(dT)
         if abs(dT)<self.rotateLimitGo:
             self.fowardFlag=True
-        else:
+        elif abs(dT)>self.rotateLimitGo:
+            self.fowardFlag=False
             pass
-            #self.fowardFlag=False
-
-        if dT>self.rotateLimitAc :
+        if dT>=self.rotateLimitAc :
             return -np.pi
-        elif dT<-self.rotateLimitAc:
+        elif dT<=-self.rotateLimitAc:
             return np.pi
         elif dT>self.stopRotate:
             return -np.sign(dT)*self.to0speed
@@ -95,6 +94,7 @@ class car:
 
 
     def straight(self):
+
         if self.distance2des<=self.inbench:
             """如果到位置就减速到0"""
             return 0
