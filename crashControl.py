@@ -48,7 +48,7 @@ class crashControl():
         self.sportStateAfter=self.sportState
         self.iscrash=False
 
-        self.jugde2wall()
+        self.judge2wall()
         self.judge2others()
         #修改完
         for i in range(4):
@@ -76,12 +76,14 @@ class crashControl():
         for i,j in list:
             if abs(self.nextloc[i][0]-self.nextloc[j][0])+abs(self.nextloc[i][1]-self.nextloc[j][1]) <self.threshold2crash:
                 self.iscrash = True
-                if abs(self.carState[i][3]-self.carState[i][3])<=np.pi/3*2:
+                if abs(self.carState[i][3]-self.carState[j][3])<=np.pi/3*2:
                     if self.sportStateAfter[j][0]!=0:
                         self.sportStateAfter[i][0] = 0
-                if abs(self.carState[i][3]-self.carState[i][3])>np.pi/3*2:
+                    else:
+                        self.sportStateAfter[i][1]=-1*np.sign(self.carState[i][3]-self.carState[j][3])*np.pi
+                if abs(self.carState[i][3]-self.carState[i][3])>np.pi/2:
                     self.sportStateAfter[j][1] =-np.pi
-                    self.sportStateAfter[j][0] = self.sportState[j][0]/3*2
+                    self.sportStateAfter[j][0] = self.sportState[j][0]/2
                     self.sportStateAfter[i][1] = -np.pi
                     self.sportStateAfter[i][0] = self.sportState[i][0] / 3 * 2
 
