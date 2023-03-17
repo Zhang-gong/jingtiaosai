@@ -95,9 +95,9 @@ class car:
 
     def straight(self):
 
-      #  if self.distance2des<=self.inbench:
-      #      """如果到位置就减速到0"""
-      #      return 6
+        #if self.distance2des<=self.inbench:
+        #    """如果到位置就减速到0"""
+        #    return 1
 
         if not self.fowardFlag:
             return 0

@@ -204,7 +204,6 @@ class Scheduler:
             dy = int(abs(sub_y)) * 2
             distance = self.sec_map_parse.map[dx][dy]
             if self.cars_busy_state[c.carid]:
-                c_task = self.cars_task_list[c.carid][0]
                 s = str(self.sec_map_parse.time) + " " + str(c_task.x) + " " + str(c_task.y) + " " + str(
                     c.x) + " " + str(c.y) + " " + str(dx) + " " + str(dy) + " " + str(distance) + "\n"
                 self.f.write(s)
@@ -215,18 +214,16 @@ class Scheduler:
                 self.outControl.putRotate(c.carid, wspeed)
             """是否在目标点"""
             if (sub_x * sub_x + sub_y * sub_y) < 0.16:
-                target_id = self.cars_task_list[c.carid][0].bench_id
-                if c.benchid == target_id:
-                    action = c_task.buy_or_sell
-                    if action == 0:
-                        self.outControl.putBuy(c.carid)
-                        self.cars_task_list[c.carid].pop(0)
+                # self.has_selected.pop((c_task.x, c_task.y))
+                action = c_task.buy_or_sell
+                if action == 0:
+                    self.outControl.putBuy(c.carid)
+                    self.cars_task_list[c.carid].pop(0)
 
-                    else:
-                        self.outControl.putSell(c.carid)
-                        self.cars_task_list[c.carid].pop(0)
-                        self.cars_busy_state[c.carid] = False
-                    self.has_selected.pop((c_task.x, c_task.y))
+                else:
+                    self.outControl.putSell(c.carid)
+                    self.cars_task_list[c.carid].pop(0)
+                    self.cars_busy_state[c.carid] = False
 
             # self.outControl.putForward(c.carid, lasttime)
             # print("car %d des is x = %f y = %f" % (c.carid, self.cars_task_list[c.carid][0].x,
