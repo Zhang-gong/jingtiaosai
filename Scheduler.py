@@ -4,6 +4,7 @@ import car
 import mapParse
 import output
 import secParse
+import os
 
 
 class ready_task:
@@ -51,9 +52,23 @@ def cul_car_target_toward(c):
 
 
 class Scheduler:
+    def write_to_log(self):
+        # 打开文件
+        with open('Log/data_log.txt', 'a') as f:
+            # 写入数据
+            f.write("the frame is %s \n" % self.sec_map_parse.time)
+            for c in self.cars:
+                f.write(
+                    "the length of car %d _task_list's length is %d\n" % (c.carid, len(self.cars_task_list[c.carid])))
+                for car_task in self.cars_task_list[c.carid]:
+                    f.write("task's bench_id is %d bench_type is %d x is %f y is"
+                            " %f action is %d\n" % (
+                                car_task.bench_id, car_task.bench_type, car_task.x, car_task.y, car_task.buy_or_sell))
+
+            f.write("\n")
+
     def __init__(self):
         self.f = open("./out.txt", "w")
-
         self.cars = [car.car(i) for i in range(4)]
         self.task_list_manager = []
         self.sec_map_parse = None
@@ -92,6 +107,10 @@ class Scheduler:
         pass
 
     def get_map_info(self):
+        if os.path.exists('Log/data_log.txt'):
+            os.remove('Log/data_log.txt')
+        with open('Log/data_log.txt', 'w') as f:
+            f.write("__init__\n")
         # print("请输入初始地图：\n")
         self.map_parse = mapParse.mapParse()
         self.sec_map_parse = secParse.secParse(self.map_parse)
@@ -174,6 +193,7 @@ class Scheduler:
             self.cars[i].getState(self.sec_map_parse.carState[i])
 
     def update_cars_state(self):
+        self.write_to_log()
         for c in self.cars:
             if len(self.cars_task_list[c.carid]) == 0:
                 continue
@@ -194,7 +214,7 @@ class Scheduler:
                 self.outControl.putForward(c.carid, speed)
                 self.outControl.putRotate(c.carid, wspeed)
             """是否在目标点"""
-            if (sub_x * sub_x + sub_y * sub_y) < 0.16 :
+            if (sub_x * sub_x + sub_y * sub_y) < 0.16:
                 target_id = self.cars_task_list[c.carid][0].bench_id
                 if c.benchid == target_id:
                     action = c_task.buy_or_sell
