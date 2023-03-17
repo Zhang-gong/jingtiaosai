@@ -140,7 +140,7 @@ class secParse():
         :param typel: 对应种类的工作台，-1表示所有工作台
         :return:  返回工作台序号和剩余时间
         """
-        arr = np.insert(self.benchState, 0, values=np.arange(self.benchState.shape[0]) + 1, axis=1)
+        arr = np.insert(self.benchState, 0, values=np.arange(self.benchState.shape[0]) , axis=1)
         arr_sorted = arr[arr[:, 4].argsort()]
         if typel == -1:
             arr_sorted = arr_sorted[:, [0, 4]]
