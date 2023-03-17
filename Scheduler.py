@@ -125,10 +125,10 @@ class Scheduler:
         pass
 
     def get_map_info(self):
-        if os.path.exists('Log/data_log.txt'):
-            os.remove('Log/data_log.txt')
-        with open('Log/data_log.txt', 'w') as f:
-            f.write("__init__\n")
+        # if os.path.exists('Log/data_log.txt'):
+        #     os.remove('Log/data_log.txt')
+        # with open('Log/data_log.txt', 'w') as f:
+        #     f.write("__init__\n")
         # print("请输入初始地图：\n")
         self.map_parse = mapParse.mapParse()
         self.sec_map_parse = secParse.secParse(self.map_parse)
@@ -212,7 +212,7 @@ class Scheduler:
             self.cars[i].getState(self.sec_map_parse.carState[i])
 
     def update_cars_state(self):
-        # self.write_to_log()
+        #self.write_to_log()
         for c in self.cars:
             if len(self.cars_task_list[c.carid]) == 0:
                 continue
