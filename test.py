@@ -4,13 +4,9 @@ import secParse
 import numpy as np
 import car
 import output
+import crashControl
 
 
-a = mapParse.mapParse()
-b = secParse.secParse(a)
-b.getState()
-
-print(b.getBench_closest_xy_type_id(3.25,2.25,-1))
 # outControl = output.output()
 # a = mapParse.mapParse()
 # b = secParse.secParse(a)
