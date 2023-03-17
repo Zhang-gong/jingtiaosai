@@ -7,12 +7,13 @@ import secParse
 
 
 class ready_task:
-    def __init__(self, bench_type, x, y, buy_or_sell):
+    def __init__(self, bench_type, x, y, buy_or_sell, bench_id):
         self.bench_type = bench_type
         self.x = x
         self.y = y
         """0是买buy，1是卖sell"""
         self.buy_or_sell = buy_or_sell
+        self.bench_id = bench_id
 
 
 class Task:
@@ -32,7 +33,7 @@ class TaskList:
         t7 = Task(3, 5)
         t8 = Task(2, 6)
         t9 = Task(3, 6)
-        t0 = Task(7, None)
+        t0 = Task(7, 8)
         self.primary_task_list = [t4, t5, t6, t7, t8, t9]
         self.senior_task_list = [t0, t1, t2, t3]
 
@@ -64,19 +65,34 @@ class Scheduler:
         self.outControl = output.output()
         """用来存已经被选为目的地的坐标，去重，主要是去重每个任务的起点"""
         self.has_selected = []
+        """True为算法，False为手动"""
+        self.mode = True
 
     def update(self):
-        #("请输入每一帧的地图信息：\n")
+        # ("请输入每一帧的地图信息：\n")
         self.outControl.putTime(self.sec_map_parse.time)
         self.sec_map_parse.getState()
         self.update_car_info()
-        self.update_task_state()
-        self.task_distribute()
-        self.update_cars_state()
+        if self.mode:
+            self.update_task_state()
+            self.task_distribute()
+            self.update_cars_state()
+        else:
+            self.hand_input_test()
         self.outControl.send()
 
+    def hand_input_test(self):
+        tmp_task_0 = ready_task(bench_type=0, x=5, y=5, buy_or_sell=0, bench_id=0)
+        tmp_task_1 = ready_task(bench_type=0, x=10, y=10, buy_or_sell=1, bench_id=0)
+        tmp_task_2 = ready_task(bench_type=0, x=15, y=15, buy_or_sell=0, bench_id=0)
+        tmp_task_3 = ready_task(bench_type=0, x=20, y=20, buy_or_sell=1, bench_id=0)
+        tmp_task_4 = ready_task(bench_type=0, x=25, y=25, buy_or_sell=0, bench_id=0)
+        tmp_task_5 = ready_task(bench_type=0, x=35, y=35, buy_or_sell=1, bench_id=0)
+
+        pass
+
     def get_map_info(self):
-        #print("请输入初始地图：\n")
+        # print("请输入初始地图：\n")
         self.map_parse = mapParse.mapParse()
         self.sec_map_parse = secParse.secParse(self.map_parse)
 
@@ -88,7 +104,7 @@ class Scheduler:
         if len(self.task_list_manager) == 0:
             t = TaskList()
             self.task_list_manager.append(t)
-           # print("new task_list_manager")
+        # print("new task_list_manager")
 
         for task_list in self.task_list_manager:
             if len(task_list.senior_task_list) == 0 and len(task_list.primary_task_list) == 0:
@@ -119,11 +135,11 @@ class Scheduler:
                 for bench_state in res_list:
                     if 50 >= int(bench_state[1]) >= 0:
                         """检查重复"""
-                        if not self.check_if_exist(bench_state[0]):
+                        if self.check_if_exist(bench_state[0]):
                             continue
                         """通过bench_id获得bench_location"""
                         x, y = self.sec_map_parse.getBench_id_loc(int(bench_state[0]))
-                        tmp_task_1 = ready_task(senior_task.from_where, float(x), float(y), 0)
+                        tmp_task_1 = ready_task(senior_task.from_where, float(x), float(y), 0, int(bench_state[0]))
                         tmp_task_2 = self.get_des_task(tmp_task_1.x, tmp_task_1.x, senior_task)
                         if tmp_task_2 is not None:
                             self.priority_tasks.append(tmp_task_1)
@@ -169,43 +185,34 @@ class Scheduler:
             distance = self.sec_map_parse.map[dx][dy]
             if self.cars_busy_state[c.carid]:
                 c_task = self.cars_task_list[c.carid][0]
-                s=    str(self.sec_map_parse.time)+" "+str(c_task.x)+" "+str(c_task.y)+" "+str(c.x)+" "+str(c.y)+" "+str(dx)+" "+str(dy)+" "+str(distance)+"\n"
+                s = str(self.sec_map_parse.time) + " " + str(c_task.x) + " " + str(c_task.y) + " " + str(
+                    c.x) + " " + str(c.y) + " " + str(dx) + " " + str(dy) + " " + str(distance) + "\n"
                 self.f.write(s)
-                if self.sec_map_parse.time==5000:
+                if self.sec_map_parse.time == 5000:
                     self.f.close()
                 speed, wspeed, lasttime = c.destination(c_task.x, c_task.y, distance)
                 self.outControl.putForward(c.carid, speed)
                 self.outControl.putRotate(c.carid, wspeed)
             """是否在目标点"""
-            if (sub_x * sub_x + sub_y * sub_y) < 0.16:
-                action = c_task.buy_or_sell
-                if action == 0:
-                    self.outControl.putBuy(c.carid)
-                    self.cars_task_list[c.carid].pop(0)
-                else:
-                    self.outControl.putSell(c.carid)
-                    self.cars_task_list[c.carid].pop(0)
-                    self.cars_busy_state[c.carid] = False
-            # print("the car state is %d" % self.cars_busy_state[c.carid])
+            if (sub_x * sub_x + sub_y * sub_y) < 0.16 :
+                target_id = self.cars_task_list[c.carid][0].bench_id
+                if c.benchid == target_id:
+                    action = c_task.buy_or_sell
+                    if action == 0:
+                        self.outControl.putBuy(c.carid)
+                        self.cars_task_list[c.carid].pop(0)
 
-                # self.outControl.putForward(c.carid, lasttime)
-                #print("car %d des is x = %f y = %f" % (c.carid, self.cars_task_list[c.carid][0].x,
-                #self.cars_task_list[c.carid][0].y))
+                    else:
+                        self.outControl.putSell(c.carid)
+                        self.cars_task_list[c.carid].pop(0)
+                        self.cars_busy_state[c.carid] = False
+                    self.has_selected.pop((c_task.x, c_task.y))
 
-    def update_forward(self):
-        """检测和目标点的距离，在一定范围外，加速，内，减速"""
-        for c in self.cars:
-            x = c.des_x - c.x
-            y = c.des_y - c.y
-            distance_to_des = x * x + y * y
-
-    def update_toward(self):
-        for c in self.cars:
-            current_toward = self.sec_map_parse.getCar_id_toward(c.carid)
-            target_toward = cul_car_target_toward(c)
-            angle_need = (target_toward - float(current_toward)) % math.pi
-            c.need_toward = angle_need
-            sys.stdout.write('rotate %d %f\n' % (c.carid, angle_need))
+            # self.outControl.putForward(c.carid, lasttime)
+            # print("car %d des is x = %f y = %f" % (c.carid, self.cars_task_list[c.carid][0].x,
+            # self.cars_task_list[c.carid][0].y))
+            # print("car %d des is x = %f y = %f" % (c.carid, self.cars_task_list[c.carid][0].x,
+            #    self.cars_task_list[c.carid][0].y))
 
     def get_des_task(self, x, y, task):
         tmp_task_2 = None
@@ -215,7 +222,7 @@ class Scheduler:
             """获得对应卖的任务,找最近的，缺货的对应工作台"""
             if not self.sec_map_parse.getBench_id_goodnum_goodState(int(des_id), task.from_where):
                 des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
-                tmp_task_2 = ready_task(task.des, float(des_x), float(des_y), 1)
+                tmp_task_2 = ready_task(task.des, float(des_x), float(des_y), 1, int(des_id))
                 return tmp_task_2
 
         return tmp_task_2
@@ -223,8 +230,8 @@ class Scheduler:
     def check_if_exist(self, bench_id):
         x, y = self.sec_map_parse.getBench_id_loc(int(bench_id))
         if self.has_selected.count((float(x), float(y))) == 0:
-            return True
-        return False
+            return False
+        return True
 
     def choose_neatest_loc(self, c, from_where):
         res_list = self.sec_map_parse.getBench_closest_xy_type_id(c.x, c.y, from_where)
@@ -245,7 +252,7 @@ class Scheduler:
         for task_list in self.task_list_manager:
             nearest = 100000.0
             choose = 0
-            tmp_task_1 = ready_task(0, 0, 0, 0)
+            tmp_task_1 = ready_task(0, 0, 0, 0, 0)
             for primary_task in task_list.primary_task_list:
                 """获得最近的任务，通过小车坐标, 任务的类型 ，得到该任务中离小车最近的点，比较所有可以的任务，拿最近的那个
                 这里应该添加一个对比，虽然任务不一样，但是可能小车会选同一个坐标，应该去重"""
@@ -253,7 +260,7 @@ class Scheduler:
                 if res is None:
                     break
                 # res_list = self.sec_map_parse.getBench_closest_xy_type_id(c.x, c.y, primary_task.from_where)
-               # print("primary_task from : " + str(primary_task.from_where) + " " + res[1])
+                # print("primary_task from : " + str(primary_task.from_where) + " " + res[1])
                 if nearest > float(res[1]):
                     nearest = float(res[1])
                     choose = primary_task
@@ -263,16 +270,16 @@ class Scheduler:
             tmp_task_1.x = float(tmp_task_1.x)
             tmp_task_1.y = float(tmp_task_1.y)
             tmp_task_1.bench_type = choose.from_where
-           # print("choose :" + str(choose.from_where))
+            # print("choose :" + str(choose.from_where))
             tmp_task_2 = self.get_des_task(tmp_task_1.x, tmp_task_1.y, choose)
             if tmp_task_2 is None:
-               # print("Error,can't find next task, push_back task_1")
+                # print("Error,can't find next task, push_back task_1")
                 continue
             else:
                 self.has_selected.append((tmp_task_1.x, tmp_task_1.y))
                 task_list.primary_task_list.remove(choose)
                 self.cars_task_list[c.carid].append(tmp_task_1)
                 self.cars_task_list[c.carid].append(tmp_task_2)
-               # print('append into car_task_list[%d] two tasks' % c.carid)
+                # print('append into car_task_list[%d] two tasks' % c.carid)
                 self.cars_busy_state[c.carid] = True
                 break
