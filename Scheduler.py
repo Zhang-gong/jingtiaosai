@@ -135,7 +135,7 @@ class Scheduler:
                 for bench_state in res_list:
                     if 50 >= int(bench_state[1]) >= 0:
                         """检查重复"""
-                        if self.check_if_exist(bench_state[0]):
+                        if not self.check_if_exist(bench_state[0]):
                             continue
                         """通过bench_id获得bench_location"""
                         x, y = self.sec_map_parse.getBench_id_loc(int(bench_state[0]))
@@ -230,8 +230,8 @@ class Scheduler:
     def check_if_exist(self, bench_id):
         x, y = self.sec_map_parse.getBench_id_loc(int(bench_id))
         if self.has_selected.count((float(x), float(y))) == 0:
-            return False
-        return True
+            return True
+        return False
 
     def choose_neatest_loc(self, c, from_where):
         res_list = self.sec_map_parse.getBench_closest_xy_type_id(c.x, c.y, from_where)
