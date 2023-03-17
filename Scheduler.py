@@ -4,6 +4,7 @@ import car
 import mapParse
 import output
 import secParse
+import os
 
 
 class ready_task:
@@ -51,9 +52,23 @@ def cul_car_target_toward(c):
 
 
 class Scheduler:
+    def write_to_log(self):
+        # 打开文件
+        with open('Log/data_log.txt', 'a') as f:
+            # 写入数据
+            f.write("the frame is %s \n" % self.sec_map_parse.time)
+            for c in self.cars:
+                f.write(
+                    "the length of car %d _task_list's length is %d\n" % (c.carid, len(self.cars_task_list[c.carid])))
+                for car_task in self.cars_task_list[c.carid]:
+                    f.write("task's bench_id is %d bench_type is %d x is %f y is"
+                            " %f action is %d\n" % (
+                                car_task.bench_id, car_task.bench_type, car_task.x, car_task.y, car_task.buy_or_sell))
+
+            f.write("\n")
+
     def __init__(self):
         self.f = open("./out.txt", "w")
-
         self.cars = [car.car(i) for i in range(4)]
         self.task_list_manager = []
         self.sec_map_parse = None
@@ -92,6 +107,10 @@ class Scheduler:
         pass
 
     def get_map_info(self):
+        if os.path.exists('Log/data_log.txt'):
+            os.remove('Log/data_log.txt')
+        with open('Log/data_log.txt', 'w') as f:
+            f.write("__init__\n")
         # print("请输入初始地图：\n")
         self.map_parse = mapParse.mapParse()
         self.sec_map_parse = secParse.secParse(self.map_parse)
@@ -174,6 +193,7 @@ class Scheduler:
             self.cars[i].getState(self.sec_map_parse.carState[i])
 
     def update_cars_state(self):
+        self.write_to_log()
         for c in self.cars:
             if len(self.cars_task_list[c.carid]) == 0:
                 continue
@@ -184,26 +204,29 @@ class Scheduler:
             dy = int(abs(sub_y)) * 2
             distance = self.sec_map_parse.map[dx][dy]
             if self.cars_busy_state[c.carid]:
-                # c_task = self.cars_task_list[c.carid][0]
+                c_task = self.cars_task_list[c.carid][0]
+                s = str(self.sec_map_parse.time) + " " + str(c_task.x) + " " + str(c_task.y) + " " + str(
+                    c.x) + " " + str(c.y) + " " + str(dx) + " " + str(dy) + " " + str(distance) + "\n"
+                self.f.write(s)
+                if self.sec_map_parse.time == 5000:
+                    self.f.close()
                 speed, wspeed, lasttime = c.destination(c_task.x, c_task.y, distance)
                 self.outControl.putForward(c.carid, speed)
                 self.outControl.putRotate(c.carid, wspeed)
             """是否在目标点"""
             if (sub_x * sub_x + sub_y * sub_y) < 0.16:
-                # target_id = self.cars_task_list[c.carid][0].bench_id
-                # if int(c.benchid) == int(target_id):
-                if self.has_selected.count((float(c_task.x), float(c_task.y))) != 0:
-                    self.has_selected.remove((float(c_task.x), float(c_task.y)))
-                action = c_task.buy_or_sell
-                if action == 0:
-                    self.outControl.putBuy(c.carid)
-                    self.cars_task_list[c.carid].pop(0)
+                target_id = self.cars_task_list[c.carid][0].bench_id
+                if c.benchid == target_id:
+                    action = c_task.buy_or_sell
+                    if action == 0:
+                        self.outControl.putBuy(c.carid)
+                        self.cars_task_list[c.carid].pop(0)
 
-                else:
-                    self.outControl.putSell(c.carid)
-                    self.cars_task_list[c.carid].pop(0)
-                    self.cars_busy_state[c.carid] = False
-
+                    else:
+                        self.outControl.putSell(c.carid)
+                        self.cars_task_list[c.carid].pop(0)
+                        self.cars_busy_state[c.carid] = False
+                    self.has_selected.pop((c_task.x, c_task.y))
 
             # self.outControl.putForward(c.carid, lasttime)
             # print("car %d des is x = %f y = %f" % (c.carid, self.cars_task_list[c.carid][0].x,
