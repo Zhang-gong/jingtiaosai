@@ -68,22 +68,25 @@ class Scheduler:
                             " %f action is %d\n" % (
                                 car_task.bench_id, car_task.bench_type, car_task.x, car_task.y, car_task.buy_or_sell))
 
-            f.write("the task list now is :\n")
-            for task_list in self.task_list_manager:
-                f.write("primary list left:\n")
-                for primart_task_list in task_list.primary_task_list:
-                    f.write(
-                        "primary_task_list from: %d to %d\n" % (primart_task_list.from_where, primart_task_list.des))
-                f.write("senior list left:\n")
-                for senior_task_list in task_list.senior_task_list:
-                    f.write("senior_task_list from: %d to %d\n" % (senior_task_list.from_where, senior_task_list.des))
-
-            f.write("the select task list is:\n")
-            for selected in self.start_has_selected:
-                f.write("start selected task's id = %s:\n" % selected)
-            for selected in self.des_has_selected:
-                f.write("des selected task's id = %s:\n" % selected)
-            f.write("self.priority_tasks len is %d:\n" % len(self.priority_tasks))
+            f.write("des_has_selected len is %d:\n" % len(self.des_has_selected))
+            for des_task in self.des_has_selected:
+                f.write("des_task id = %s type = %d\n" % (des_task.bench_id, des_task.bench_type))
+            # f.write("the task list now is :\n")
+            # for task_list in self.task_list_manager:
+            #     f.write("primary list left:\n")
+            #     for primart_task_list in task_list.primary_task_list:
+            #         f.write(
+            #             "primary_task_list from: %d to %d\n" % (primart_task_list.from_where, primart_task_list.des))
+            #     f.write("senior list left:\n")
+            #     for senior_task_list in task_list.senior_task_list:
+            #         f.write("senior_task_list from: %d to %d\n" % (senior_task_list.from_where, senior_task_list.des))
+            #
+            # f.write("the select task list is:\n")
+            # for selected in self.start_has_selected:
+            #     f.write("start selected task's id = %s:\n" % selected)
+            # for selected in self.des_has_selected:
+            #     f.write("des selected task's id = %s:\n" % selected.bench_id)
+            # f.write("self.priority_tasks len is %d:\n" % len(self.priority_tasks))
 
             f.write("\n")
 
@@ -100,14 +103,13 @@ class Scheduler:
         """用来存已经被选为目的地的坐标，去重，主要是去重每个任务的起点"""
         self.start_has_selected = []
         self.des_has_selected = []
-        self.start_bench_type = []
         """True为算法，False为手动"""
         self.mode = True
 
         self.crashControler = crashControl()
 
-        self.t_car1 = [[0.75, 30], [6, 0.75], [10, 2]]
-        self.t_car2 = [[10, 2], [10, 48], [0.5, 49]]
+        self.t_car1 = [[5, 1], [25, 25], [49, 4]]
+        self.t_car2 = [[21, 10], [20, 2], [30, 3]]
 
     def update(self):
         # ("请输入每一帧的地图信息：\n")
@@ -157,10 +159,10 @@ class Scheduler:
                 self.t_car2.pop(0)
 
     def get_map_info(self):
-        # if os.path.exists('Log/data_log.txt'):
-        #     os.remove('Log/data_log.txt')
-        # with open('Log/data_log.txt', 'w') as f:
-        #     f.write("__init__\n")
+        if os.path.exists('Log/data_log.txt'):
+            os.remove('Log/data_log.txt')
+        with open('Log/data_log.txt', 'w') as f:
+            f.write("__init__\n")
         # print("请输入初始地图：\n")
         self.map_parse = mapParse.mapParse()
         self.sec_map_parse = secParse.secParse(self.map_parse)
@@ -213,8 +215,7 @@ class Scheduler:
                             self.priority_tasks.append(tmp_task_2)
                             """去重"""
                             self.start_has_selected.append(tmp_task_1.bench_id)
-                            self.start_bench_type.append(tmp_task_1.bench_type)
-                            self.des_has_selected.append(tmp_task_2.bench_id)
+                            self.des_has_selected.append(tmp_task_2)
                             flag = True
                             break
                 if flag:
@@ -244,7 +245,8 @@ class Scheduler:
             self.cars[i].getState(self.sec_map_parse.carState[i])
 
     def update_cars_state(self):
-        #self.write_to_log()
+        self.write_to_log()
+        self.crashControler.putCarState(self.sec_map_parse.carState[:, 4:10])
         for c in self.cars:
             if len(self.cars_task_list[c.carid]) == 0:
                 continue
@@ -259,7 +261,6 @@ class Scheduler:
                 if self.sec_map_parse.time == 5000:
                     self.f.close()
                 speed, wspeed, lasttime = c.destination(c_task.x, c_task.y, distance)
-                self.crashControler.putCarState(self.sec_map_parse.carState[:, 4:10])
                 self.crashControler.putSportState(c.carid, speed, wspeed)
                 self.crashControler.judgeAndModify()
                 speed, wspeed = self.crashControler.getSportStateAter(c.carid)  # 返回第零个车的修改
@@ -273,13 +274,14 @@ class Scheduler:
                     self.cars_task_list[c.carid].pop(0)
                     if self.start_has_selected.count(c_task.bench_id) > 0:
                         self.start_has_selected.remove(c_task.bench_id)
-                        self.start_bench_type.remove(c_task.bench_type)
 
                 else:
                     self.outControl.putSell(c.carid)
                     self.cars_task_list[c.carid].pop(0)
-                    if self.des_has_selected.count(c_task.bench_id) > 0:
-                        self.des_has_selected.remove(c_task.bench_id)
+                    if self.des_has_selected.count(c_task) > 0:
+                        with open('Log/data_log.txt', 'a') as f:
+                            f.write("\n SUCCESSFULL POP!!! \n")
+                        self.des_has_selected.remove(c_task)
                     self.cars_busy_state[c.carid] = False
 
             # self.outControl.putForward(c.carid, lasttime)
@@ -287,6 +289,14 @@ class Scheduler:
             # self.cars_task_list[c.carid][0].y))
             # print("car %d des is x = %f y = %f" % (c.carid, self.cars_task_list[c.carid][0].x,
             #    self.cars_task_list[c.carid][0].y))
+
+    def check_des_task_exist(self, sell_goods_type, des_id):
+        for i in range(len(self.des_has_selected)):
+            des_task = self.des_has_selected[i]
+            if des_task.bench_id == des_id and sell_goods_type == des_task.bench_type:
+                return False
+        return True
+
 
     def get_des_task(self, tmp_task, task):
         tmp_task_2 = None
@@ -296,10 +306,12 @@ class Scheduler:
             """获得对应卖的任务,找最近的，缺货的对应工作台"""
             if not self.sec_map_parse.getBench_id_goodnum_goodState(int(des_id), task.from_where):
                 #
-                if self.des_has_selected.count(des_id) > 0 and self.start_bench_type.count(tmp_task.bench_type) > 0:
+                # with open('Log/data_log.txt', 'a') as f:
+                #     f.write()
+                if not self.check_des_task_exist(task.from_where, des_id):
                     continue
                 des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
-                tmp_task_2 = ready_task(task.des, float(des_x), float(des_y), 1, des_id)
+                tmp_task_2 = ready_task(task.from_where, float(des_x), float(des_y), 1, des_id)
                 return tmp_task_2
 
         return tmp_task_2
@@ -354,8 +366,7 @@ class Scheduler:
                 continue
             else:
                 self.start_has_selected.append(tmp_task_1.bench_id)
-                self.start_bench_type.append(tmp_task_1.bench_type)
-                self.des_has_selected.append(tmp_task_2.bench_id)
+                self.des_has_selected.append(tmp_task_2)
                 task_list.primary_task_list.remove(choose)
                 self.cars_task_list[c.carid].append(tmp_task_1)
                 self.cars_task_list[c.carid].append(tmp_task_2)

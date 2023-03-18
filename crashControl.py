@@ -60,11 +60,11 @@ class crashControl():
                     list.append([i,j])
         #(i与j存在碰撞风险)
         #如果方向差绝对值小于pi/2就一个停止，如果方向差值大于则都右转pi且速度为原来2/3
-        nextloc=np.zeros((self.nFrameOthers,4,2))
-        for j in range(self.nFrameOthers):
+        nextloc=np.zeros((self.nFrameOthers+1,4,2))
+        for j in range(self.nFrameOthers+1):
             for i in range(4):
-                nextloc[j][i][0] = float(self.carState[i][4]) + (float(self.carState[i][1])*(j+1)/50)
-                nextloc[j][i][1] = float(self.carState[i][5]) + (float(self.carState[i][2])*(j+1)/50)
+                nextloc[j][i][0] = float(self.carState[i][4]) + (float(self.carState[i][1])*(j)/50)
+                nextloc[j][i][1] = float(self.carState[i][5]) + (float(self.carState[i][2])*(j)/50)
 
 
         for i,j in list:
