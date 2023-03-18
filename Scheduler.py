@@ -172,7 +172,25 @@ class Scheduler:
             self.update_cars_state()
         else:
             self.hand_input_test()
+        self.additional_task()
         self.outControl.send()
+
+    def additional_task(self):
+        while len(self.crashControler.avoidCrashTaskList) > 0:
+            with open('Log/data_log.txt', 'a') as f:
+                f.write("!!!!!!!!!!!!\n")
+            crash_list = self.crashControler.avoidCrashTaskList.pop(0)
+            if crash_list[1] > 49.75:
+                crash_list[1] = 50.0
+            if crash_list[2] > 49.75:
+                crash_list[2] = 50.0
+            if crash_list[1] < 0.25:
+                crash_list[1] = 0
+            if crash_list[2] < 0.25:
+                crash_list[2] = 0
+            speed, wspeed, lasttime = self.cars[crash_list[0]].destination(crash_list[1], crash_list[2], 100)
+            self.outControl.putForward(crash_list[0], speed)
+            self.outControl.putRotate(crash_list[0], wspeed)
 
     def hand_input_test(self):
         if len(self.t_car1) > 0:
@@ -290,9 +308,9 @@ class Scheduler:
         如果优先处理队列priority_tasks里面有任务了，优先处理
         :return:
         """
-        if len(self.priority_tasks) >= 2:
-            for i in range(4):
-                """第j辆车，如果不忙"""
+        for i in range(4):
+            """第j辆车，如果不忙"""
+            if len(self.priority_tasks) >= 2:
                 if not self.cars_busy_state[i]:
                     self.cars_task_list[i].append(self.priority_tasks[0])
                     self.priority_tasks.pop(0)
@@ -325,9 +343,9 @@ class Scheduler:
                 if self.sec_map_parse.time == 5000:
                     self.f.close()
                 speed, wspeed, lasttime = c.destination(c_task.x, c_task.y, distance)
-                # self.crashControler.putSportState(c.carid, speed, wspeed)
-                # self.crashControler.judgeAndModify()
-                # speed, wspeed = self.crashControler.getSportStateAter(c.carid)  # 返回第零个车的修改
+                self.crashControler.putSportState(c.carid, speed, wspeed)
+                self.crashControler.judgeAndModify()
+                speed, wspeed = self.crashControler.getSportStateAter(c.carid)  # 返回第零个车的修改
                 self.outControl.putForward(c.carid, speed)
                 self.outControl.putRotate(c.carid, wspeed)
             """是否在目标点"""
@@ -343,8 +361,8 @@ class Scheduler:
                     self.outControl.putSell(c.carid)
                     self.cars_task_list[c.carid].pop(0)
                     if self.des_has_selected.count(c_task) > 0:
-                        with open('Log/data_log.txt', 'a') as f:
-                            f.write("\n SUCCESSFULL POP!!! \n")
+                        # with open('Log/data_log.txt', 'a') as f:
+                        #     f.write("\n SUCCESSFULL POP!!! \n")
                         self.des_has_selected.remove(c_task)
                     self.cars_busy_state[c.carid] = False
 

@@ -6,7 +6,7 @@ class car:
     def __init__(self, car_id):
         self.inbench=0.0002
         self.rotateLimitAc=0.13#0.13#加减速临界角度
-        self.rotateLimitGo = 1.25# 启动临界角度1.25 在使用碰撞控制后不再被需要，，对于近距离的运送，大角度的转弯 可以优化一份针对性的算法，在没有针对性算法前补偿使用
+        self.rotateLimitGo = 0.5# 启动临界角度1.25 在使用碰撞控制后不再被需要，，对于近距离的运送，大角度的转弯 可以优化一份针对性的算法，在没有针对性算法前补偿使用
         self.to0speed=0.75#一针到0的速度
         self.stopRotate=0.17#停止临界
         self.closeDesBench=1.0  #判断是否是近距离寻路
@@ -105,7 +105,7 @@ class car:
         #    return 1
 
         if not self.fowardFlag:
-            return 3
+            return 1
         #全速前进，不行再说
         return 6
 
