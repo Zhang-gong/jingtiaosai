@@ -56,6 +56,7 @@ class crashControl():
             if nextloc[i][0]>50.1or nextloc[i][0]<-0.1 or nextloc[i][1]>50.1 or nextloc[i][1]<0.1:
             #出界,线速度1，提前会有终点信息让我0
                 self.sportStateAfter[i][0]=0
+                self.iscrash = True
     def judge2others(self):
         list=[]
         for i in range(4):
@@ -76,6 +77,7 @@ class crashControl():
             for t in range(self.nFrameOthers):
                 if abs(nextloc[t][i][0]-nextloc[t][j][0])**2+abs(nextloc[t][i][1]-nextloc[t][j][1])**2 <self.threshold2crash:
                     modify=True
+                    self.iscrash = True
                     break
             if modify:
                 Titoj = self.angle(float(self.carState[i][4]), float(self.carState[i][5]),

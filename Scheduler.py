@@ -8,6 +8,56 @@ import output
 import secParse
 import os
 
+TASK_LIST = [[1, 4], [2, 4], [1, 5], [3, 5], [2, 6], [3, 6], [4, 7], [5, 7], [6, 7], [7, 8], [1, 9], [2, 9], [3, 9],
+             [4, 9], [5, 9], [6, 9], [7, 9]]
+
+SHOULD_DELETE = []
+
+
+def if_have_nine(lack_list):
+    for i in range(len(lack_list)):
+        if lack_list[i] == 9:
+            return False
+    return True
+
+
+def pop_task_list(lack_list):
+    have_nine = if_have_nine(lack_list)
+    while len(lack_list) != 0:
+        for i in range(len(TASK_LIST)):
+            if lack_list[0] == TASK_LIST[i][0]:
+                if SHOULD_DELETE.count(TASK_LIST[i]) == 0:
+                    SHOULD_DELETE.append(TASK_LIST[i])
+                if TASK_LIST[i][1] == 9 and have_nine:
+                    continue
+                lack_list.append(TASK_LIST[i][1])
+        for i in range(len(TASK_LIST)):
+            if lack_list[0] == TASK_LIST[i][1]:
+                if SHOULD_DELETE.count(TASK_LIST[i]) == 0:
+                    SHOULD_DELETE.append(TASK_LIST[i])
+        lack_list.pop(0)
+    for i in range(len(SHOULD_DELETE)):
+        TASK_LIST.remove(SHOULD_DELETE[i])
+    if TASK_LIST.count([1, 4]) > 0:
+        if TASK_LIST.count([1, 9]) > 0:
+            TASK_LIST.remove([1, 9])
+    if TASK_LIST.count([2, 4]) > 0:
+        if TASK_LIST.count([2, 9]) > 0:
+            TASK_LIST.remove([2, 9])
+    if TASK_LIST.count([1, 5]) > 0:
+        if TASK_LIST.count([1, 9]) > 0:
+            TASK_LIST.remove([1, 9])
+    if TASK_LIST.count([3, 5]) > 0:
+        if TASK_LIST.count([3, 9]) > 0:
+            TASK_LIST.remove([3, 9])
+    if TASK_LIST.count([2, 6]) > 0:
+        if TASK_LIST.count([2, 9]) > 0:
+            TASK_LIST.remove([2, 9])
+    if TASK_LIST.count([3, 6]) > 0:
+        if TASK_LIST.count([3, 9]) > 0:
+            TASK_LIST.remove([3, 9])
+    SHOULD_DELETE.clear()
+
 
 class ready_task:
     def __init__(self, bench_type, x, y, buy_or_sell, bench_id):
@@ -27,18 +77,13 @@ class Task:
 
 class TaskList:
     def __init__(self):
-        t1 = Task(4, 7)
-        t3 = Task(5, 7)
-        t2 = Task(6, 7)
-        t4 = Task(1, 4)
-        t5 = Task(2, 4)
-        t6 = Task(1, 5)
-        t7 = Task(3, 5)
-        t8 = Task(2, 6)
-        t9 = Task(3, 6)
-        t0 = Task(7, 8)
-        self.primary_task_list = [t4, t5, t6, t7, t8, t9]
-        self.senior_task_list = [t0, t1, t2, t3]
+        self.primary_task_list = []
+        self.senior_task_list = []
+        for task in TASK_LIST:
+            if task[0] < 4:
+                self.primary_task_list.append(Task(task[0], task[1]))
+            else:
+                self.senior_task_list.append(Task(task[0], task[1]))
 
 
 def cul_car_target_toward(c):
@@ -60,26 +105,28 @@ class Scheduler:
             # 写入数据
             f.write("the frame is %s \n" % self.sec_map_parse.time)
             for c in self.cars:
-                f.write("the location of the car %d is x = %f y = %f\n" % (c.carid, c.x, c.y))
+                # f.write("the location of the car %d is x = %f y = %f\n" % (c.carid, c.x, c.y))
                 f.write(
                     "the length of car %d _task_list's length is %d\n" % (c.carid, len(self.cars_task_list[c.carid])))
-                for car_task in self.cars_task_list[c.carid]:
-                    f.write("task's bench_id is %s bench_type is %d x is %f y is"
-                            " %f action is %d\n" % (
-                                car_task.bench_id, car_task.bench_type, car_task.x, car_task.y, car_task.buy_or_sell))
+                # for car_task in self.cars_task_list[c.carid]:
+                #     f.write("task's bench_id is %s bench_type is %d x is %f y is"
+                #             " %f action is %d\n" % (
+                #                 car_task.bench_id, car_task.bench_type, car_task.x, car_task.y, car_task.buy_or_sell))
 
-            f.write("des_has_selected len is %d:\n" % len(self.des_has_selected))
-            for des_task in self.des_has_selected:
-                f.write("des_task id = %s type = %d\n" % (des_task.bench_id, des_task.bench_type))
-            # f.write("the task list now is :\n")
-            # for task_list in self.task_list_manager:
-            #     f.write("primary list left:\n")
-            #     for primart_task_list in task_list.primary_task_list:
-            #         f.write(
-            #             "primary_task_list from: %d to %d\n" % (primart_task_list.from_where, primart_task_list.des))
-            #     f.write("senior list left:\n")
-            #     for senior_task_list in task_list.senior_task_list:
-            #         f.write("senior_task_list from: %d to %d\n" % (senior_task_list.from_where, senior_task_list.des))
+            # f.write("des_has_selected len is %d:\n" % len(self.des_has_selected))
+            # for des_task in self.des_has_selected:
+            #     f.write("des_task id = %s type = %d\n" % (des_task.bench_id, des_task.bench_type))
+            f.write("the task list now is :\n")
+            f.write("the task list manager now len is %d:\n" % len(self.task_list_manager))
+
+            for task_list in self.task_list_manager:
+                f.write("primary list left %d:\n" % len(task_list.primary_task_list))
+                f.write("senior list left %d:\n" % len(task_list.senior_task_list))
+                for primart_task_list in task_list.primary_task_list:
+                    f.write(
+                        "primary_task_list from: %d to %d\n" % (primart_task_list.from_where, primart_task_list.des))
+                for senior_task_list in task_list.senior_task_list:
+                    f.write("senior_task_list from: %d to %d\n" % (senior_task_list.from_where, senior_task_list.des))
             #
             # f.write("the select task list is:\n")
             # for selected in self.start_has_selected:
@@ -117,7 +164,10 @@ class Scheduler:
         self.sec_map_parse.getState()
         self.update_car_info()
         if self.mode:
-            self.update_task_state()
+            for c in self.cars_busy_state:
+                if not c:
+                    self.update_task_state()
+                    break
             self.task_distribute()
             self.update_cars_state()
         else:
@@ -166,6 +216,13 @@ class Scheduler:
         # print("请输入初始地图：\n")
         self.map_parse = mapParse.mapParse()
         self.sec_map_parse = secParse.secParse(self.map_parse)
+        tmp_lack_list = []
+        for i in range(len(self.map_parse.bench)):
+            if len(self.map_parse.bench[i]) == 0:
+                j = i + 1
+                tmp_lack_list.append(j)
+        pop_task_list(tmp_lack_list)
+        # print(TASK_LIST)
 
     def update_task_list_manager(self):
         """
@@ -180,6 +237,7 @@ class Scheduler:
         for task_list in self.task_list_manager:
             if len(task_list.senior_task_list) == 0 and len(task_list.primary_task_list) == 0:
                 self.task_list_manager.remove(task_list)
+            break
 
         length = len(self.task_list_manager)
         if len(self.task_list_manager[length - 1].primary_task_list) < 4:
@@ -204,9 +262,13 @@ class Scheduler:
                 for bench_state in res_list:
                     if 50 >= int(bench_state[1]) >= 0:
                         """检查重复"""
+                        # with open('Log/data_log.txt', 'a') as f:
+                        #     f.write("FIND THE RES_LIST\n")
                         if not self.check_if_exist(bench_state[0]):
                             continue
                         """通过bench_id获得bench_location"""
+                        # with open('Log/data_log.txt', 'a') as f:
+                        #     f.write("FIND 2222\n")
                         x, y = self.sec_map_parse.getBench_id_loc(int(bench_state[0]))
                         tmp_task_1 = ready_task(senior_task.from_where, float(x), float(y), 0, bench_state[0])
                         tmp_task_2 = self.get_des_task(tmp_task_1, senior_task)
@@ -217,6 +279,8 @@ class Scheduler:
                             self.start_has_selected.append(tmp_task_1.bench_id)
                             self.des_has_selected.append(tmp_task_2)
                             flag = True
+                            # with open('Log/data_log.txt', 'a') as f:
+                            #     f.write("FIND 33333\n")
                             break
                 if flag:
                     task_list.senior_task_list.remove(senior_task)
@@ -245,7 +309,7 @@ class Scheduler:
             self.cars[i].getState(self.sec_map_parse.carState[i])
 
     def update_cars_state(self):
-        self.write_to_log()
+        # self.write_to_log()
         self.crashControler.putCarState(self.sec_map_parse.carState[:, 4:10])
         for c in self.cars:
             if len(self.cars_task_list[c.carid]) == 0:
@@ -261,9 +325,9 @@ class Scheduler:
                 if self.sec_map_parse.time == 5000:
                     self.f.close()
                 speed, wspeed, lasttime = c.destination(c_task.x, c_task.y, distance)
-                self.crashControler.putSportState(c.carid, speed, wspeed)
-                self.crashControler.judgeAndModify()
-                speed, wspeed = self.crashControler.getSportStateAter(c.carid)  # 返回第零个车的修改
+                # self.crashControler.putSportState(c.carid, speed, wspeed)
+                # self.crashControler.judgeAndModify()
+                # speed, wspeed = self.crashControler.getSportStateAter(c.carid)  # 返回第零个车的修改
                 self.outControl.putForward(c.carid, speed)
                 self.outControl.putRotate(c.carid, wspeed)
             """是否在目标点"""
@@ -297,12 +361,13 @@ class Scheduler:
                 return False
         return True
 
-
     def get_des_task(self, tmp_task, task):
         tmp_task_2 = None
         des_list = self.sec_map_parse.getBench_closest_xy_type_id(tmp_task.x, tmp_task.y, task.des)
         for des in des_list:
             des_id = des[0]
+            # with open('Log/data_log.txt', 'a') as f:
+            #     f.write("FIND 2222\n")
             """获得对应卖的任务,找最近的，缺货的对应工作台"""
             if not self.sec_map_parse.getBench_id_goodnum_goodState(int(des_id), task.from_where):
                 #
