@@ -6,7 +6,7 @@ class car:
     def __init__(self, car_id):
         self.inbench=0.0002
         self.rotateLimitAc=0.13#0.13#加减速临界角度
-        self.rotateLimitGo = 1.25# 启动临界角度
+        self.rotateLimitGo = 1.25# 启动临界角度1.25 在使用碰撞控制后不再被需要，，对于近距离的运送，大角度的转弯 可以优化一份针对性的算法，在没有针对性算法前补偿使用
         self.to0speed=0.75#一针到0的速度
         self.stopRotate=0.17#停止临界
         #常量区
@@ -65,9 +65,9 @@ class car:
         if self.distance2des<=self.inbench:
             """如果到位置就减速到0"""
             return 0
-        if (abs(self.speed_x)+abs(self.speed_y))>=0.1 and not self.fowardFlag:
-            #没到位置，速度先为0先调整方向
-            return 0
+        #if (abs(self.speed_x)+abs(self.speed_y))>=0.1 and not self.fowardFlag:
+        #    #没到位置，速度先为0先调整方向
+        #    return 0
 
         dT=self.toward-self.angle()
         #0到pi 顺时针 pi到2pi，逆时针 -pi到0逆时针 -2pi到-pi顺时针
@@ -100,7 +100,7 @@ class car:
         #    return 1
 
         if not self.fowardFlag:
-            return 0
+            return 3
         #全速前进，不行再说
         return 6
 

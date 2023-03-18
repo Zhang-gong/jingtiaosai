@@ -102,12 +102,12 @@ class Scheduler:
         self.des_has_selected = []
         self.start_bench_type = []
         """True为算法，False为手动"""
-        self.mode = False
+        self.mode = True
 
         self.crashControler = crashControl()
 
-        self.t_car1 = [[5, 1], [25, 25], [49, 4]]
-        self.t_car2 = [[21, 10], [20, 2], [30, 3]]
+        self.t_car1 = [[0.75, 30], [6, 0.75], [10, 2]]
+        self.t_car2 = [[10, 2], [10, 48], [0.5, 49]]
 
     def update(self):
         # ("请输入每一帧的地图信息：\n")
@@ -259,6 +259,10 @@ class Scheduler:
                 if self.sec_map_parse.time == 5000:
                     self.f.close()
                 speed, wspeed, lasttime = c.destination(c_task.x, c_task.y, distance)
+                self.crashControler.putCarState(self.sec_map_parse.carState[:, 4:10])
+                self.crashControler.putSportState(c.carid, speed, wspeed)
+                self.crashControler.judgeAndModify()
+                speed, wspeed = self.crashControler.getSportStateAter(c.carid)  # 返回第零个车的修改
                 self.outControl.putForward(c.carid, speed)
                 self.outControl.putRotate(c.carid, wspeed)
             """是否在目标点"""

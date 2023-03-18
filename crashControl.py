@@ -1,29 +1,21 @@
 import numpy as np
 """
-输入四个车的坐标，和当前控制信息，来判断下一帧是否碰撞，并返回不碰撞调整
-matrix = np.random.rand(4, 10)
-a=crashControl.crashControl()
-
-a.putCarState(matrix[:,4:10])
-for i in range(4):
-    #调用destination获得两个速度
-    speed=i
-    wspeed=i
-    a.putSportState(i,speed,wspeed)
-#数据输入完了
-a.judgeAndModify()
-
-speed,wspeed=a.getSportStateAter(2)#返回第2个车的修改
-print(speed,wspeed)
-#再传给output
+靠墙判断处理不了0.25 也不行（问题是车就到不了这个坐标啊宽0.4
+0.5贴墙效果也很差（不会有个调度跨地图还是边角吧
 """
 class crashControl():
     def __init__(self):
 
-        self.nFrame=3                                       #预判帧数
-        self.threshold2others=(0.53+self.nFrame*6/50)*2*1.414                #小车中心dx+dy超过这个值被判定为间隔很远
-        self.threshold2crash=0.53*2                                             #判断相撞临界
+        self.nFrameWall=4                                                  #预判帧数 对墙
+        self.nFrameOthers = 8                                               #相互
+        self.threshold2others=(0.53+self.nFrameOthers*6/50)*2*1.414          #小车中心dx+dy超过这个值被判定为间隔很远
+        self.threshold2crash=1.1*1.1                               #判断相撞临界的平方
+        self.threshold2angle=np.pi/5*4                              #相撞一般一顺一逆，极端情况同时顺或逆，临界值
+        self.decRate=5/6                                      #速度每次降
+        self.speedWhenRate=4
+        self.r_wall=2.4
         self.xmax=50
+
         self.xmin=0
         self.ymax=50
         self.ymin=0
@@ -50,43 +42,83 @@ class crashControl():
 
         self.judge2wall()
         self.judge2others()
-        #修改完
-        for i in range(4):
-            self.putSportState(i,self.sportStateAfter[i][0],self.sportStateAfter[i][1])
-        if self.iscrash:
-            self.judgeAndModify()
+
     def judge2wall(self):
-        self.nextloc=np.zeros((4,2))
+        nextloc=np.zeros((4,2))
         for i in range(4):
             #线速度带符号的
-            self.nextloc[i][0]=self.carState[i][4]+self.threshold2zero(abs(self.carState[i][1]))
-            self.nextloc[i][1] =self.carState[i][5] + self.threshold2zero(abs(self.carState[i][2]))
-            if self.nextloc[i][0]>50 or self.nextloc[i][0]<0 or self.nextloc[i][1]>50 or self.nextloc[i][1]<0:
-            #出界,线速度0
+            nextloc[i][0]=float(self.carState[i][4])+self.threshold2zero((float(self.carState[i][1])))
+            nextloc[i][1] =float(self.carState[i][5]) + self.threshold2zero((float(self.carState[i][2])))
+            if nextloc[i][0]>50.1or nextloc[i][0]<-0.1 or nextloc[i][1]>50.1 or nextloc[i][1]<0.1:
+            #出界,线速度1，提前会有终点信息让我0
                 self.sportStateAfter[i][0]=0
-                self.iscrash=True
     def judge2others(self):
         list=[]
         for i in range(4):
             for j in range(i+1,4):
-                if abs(self.carState[i][4]-self.carState[j][4])+abs(self.carState[i][5]-self.carState[j][5]) <self.threshold2others:
+                if abs(float(self.carState[i][4])-float(self.carState[j][4]))+abs(float(self.carState[i][5])-float(self.carState[j][5])) <self.threshold2others:
                     list.append([i,j])
         #(i与j存在碰撞风险)
         #如果方向差绝对值小于pi/2就一个停止，如果方向差值大于则都右转pi且速度为原来2/3
+        nextloc=np.zeros((self.nFrameOthers,4,2))
+        for j in range(self.nFrameOthers):
+            for i in range(4):
+                nextloc[j][i][0] = float(self.carState[i][4]) + (float(self.carState[i][1])*(j+1)/50)
+                nextloc[j][i][1] = float(self.carState[i][5]) + (float(self.carState[i][2])*(j+1)/50)
+
+
         for i,j in list:
-            if abs(self.nextloc[i][0]-self.nextloc[j][0])+abs(self.nextloc[i][1]-self.nextloc[j][1]) <self.threshold2crash:
-                self.iscrash = True
-                if abs(self.carState[i][3]-self.carState[j][3])<=np.pi/3*2:
-                    if self.sportStateAfter[j][0]!=0:
-                        self.sportStateAfter[i][0] = 0
-                    else:
-                        self.sportStateAfter[i][1]=-1*np.sign(self.carState[i][3]-self.carState[j][3])*np.pi
-                if abs(self.carState[i][3]-self.carState[i][3])>np.pi/2:
-                    self.sportStateAfter[j][1] =-np.pi
-                    self.sportStateAfter[j][0] = self.sportState[j][0]/2
+            modify=False
+            for t in range(self.nFrameOthers):
+                if abs(nextloc[t][i][0]-nextloc[t][j][0])**2+abs(nextloc[t][i][1]-nextloc[t][j][1])**2 <self.threshold2crash:
+                    modify=True
+                    break
+            if modify:
+                Titoj = self.angle(float(self.carState[i][4]), float(self.carState[i][5]),
+                                   float(self.carState[j][4]), float(self.carState[j][5]))  # j视角中的i
+                if Titoj - float(self.carState[j][3]) > 0:
+                    self.sportStateAfter[i][1] = +np.pi
+                    self.sportStateAfter[i][0] = self.sportStateAfter[i][1]
+                    self.sportStateAfter[j][1] = -np.pi
+                    self.sportStateAfter[j][0] = self.sportStateAfter[j][1]*self.decRate
+
+                else:
                     self.sportStateAfter[i][1] = -np.pi
-                    self.sportStateAfter[i][0] = self.sportState[i][0] / 3 * 2
+                    self.sportStateAfter[i][0] = self.sportStateAfter[i][1]
+                    self.sportStateAfter[j][1] = np.pi
+                    self.sportStateAfter[j][0] = self.sportStateAfter[j][1]*self.decRate
+                if  abs(float(self.carState[i][3])-float(self.carState[j][3]))>self.threshold2angle:
+
+                    if Titoj-float(self.carState[j][3]) >0:
+                        self.sportStateAfter[i][1] = -np.pi
+                    else:
+                        self.sportStateAfter[i][1] = np.pi
+
+
+
+
 
 
     def threshold2zero(self,v0):
-        return v0*self.nFrame-np.sign(v0)*0.5*self.nFrame*self.nFrame # 撞墙临界值
+        return v0*self.nFrameWall/50*self.r_wall+np.sign(v0)*0.5*self.nFrameWall*self.nFrameWall/50*self.r_wall *self.r_wall# 撞墙临界值
+
+    def angle(self,desx,desy,x,y):
+        dx = desx - x
+        dy = desy - y
+        try:
+            tanT = dy / dx
+            T = np.arctan(tanT)
+
+            if tanT > 0:
+                if dx < 0:
+                    T = T - np.pi
+            if tanT <= 0:
+                if dx < 0:
+                    T = T + np.pi
+
+        except:
+            if dy > 0:
+                T = np.pi / 2
+            else:
+                T = -np.pi / 2
+        return T
