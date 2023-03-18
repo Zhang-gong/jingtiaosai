@@ -79,6 +79,7 @@ class secParse():
         :param goodnum:  判断是否有货物的编号
         :return:  有就是True，没有就是Flase
         """
+        goodnum+=1
         k = int(self.benchState[id][4])
         n = 1 << goodnum
         k = k % n

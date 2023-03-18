@@ -5,9 +5,14 @@ import numpy as np
 import car
 import output
 
+
+
 # outControl = output.output()
-# a = mapParse.mapParse()
-# b = secParse.secParse(a)
+a = mapParse.mapParse()
+b = secParse.secParse(a)
+b.getState()
+b.benchState[0][4]=2
+print(b.getBench_id_goodnum_goodState(0,1))
 # car0=car.car(0)
 # car1=car.car(1)
 # car2=car.car(2)
