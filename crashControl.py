@@ -15,10 +15,14 @@ class crashControl():
         self.speedWhenRate=4
         self.r_wall=2.4
         self.xmax=50
-
         self.xmin=0
         self.ymax=50
         self.ymin=0
+        self.avoidCrashTaskList=[]              #避免亲嘴的任务列表,id x,y  比小距离大
+        self.CollisionFineTuning=2              #碰撞微调系数
+        self.fineFlag=0                         #大于0就是正撞?好像没用
+
+
         self.iscrash=False
 
         self.carState=None
@@ -88,11 +92,28 @@ class crashControl():
                     self.sportStateAfter[j][1] = np.pi
                     self.sportStateAfter[j][0] = self.sportStateAfter[j][1]*self.decRate
                 if  abs(float(self.carState[i][3])-float(self.carState[j][3]))>self.threshold2angle:
-
+                    xi = float(self.carState[i][4])
+                    yi = float(self.carState[i][5])
+                    xj = float(self.carState[j][4])
+                    yj = float(self.carState[j][5])
+                    dx = xi - xj
+                    dy = yi - yj
                     if Titoj-float(self.carState[j][3]) >0:
                         self.sportStateAfter[i][1] = -np.pi
+
+                        self.avoidCrashTaskList.append(
+                            [j,xj+dy*self.CollisionFineTuning,yj -dx*self.CollisionFineTuning])
+                        self.avoidCrashTaskList.append(
+                            [i, xi - dy * self.CollisionFineTuning, xi+ dx * self.CollisionFineTuning])
                     else:
                         self.sportStateAfter[i][1] = np.pi
+                        self.avoidCrashTaskList.append(
+                            [j, xj - dy * self.CollisionFineTuning, yj + dx * self.CollisionFineTuning])
+                        self.avoidCrashTaskList.append(
+                            [i, xi + dy * self.CollisionFineTuning, xi - dx * self.CollisionFineTuning])
+
+
+                self.fineFlag=self.sportStateAfter[i][1]*self.sportStateAfter[j][1]
 
 
 

@@ -1,44 +1,27 @@
-import mapParse
-import time
-import secParse
 import numpy as np
-import car
-import output
+import matplotlib.pyplot as plt
+# 初始条件
+v0 = 6
+dt = 0.02
+t = np.arange(0, 50 * dt, dt)
+x = np.zeros_like(t)
+y = np.zeros_like(t)
+vx = np.zeros_like(t)
+vy = np.zeros_like(t)
+vx[0] = 0
+vy[0] = v0
+# 计算运动轨迹
+for i in range(1, len(t)):
+    omega = np.pi / 50 * t[i-1]
+    ax = np.pi / 50 * vy[i-1]
+    ay = -np.pi / 50 * vx[i-1]
+    vx[i] = vx[i-1] + ax * dt
+    vy[i] = vy[i-1] + ay * dt
+    x[i] = x[i-1] + vx[i] * dt
+    y[i] = y[i-1] + vy[i] * dt
+# 绘制轨迹图
+    plt.plot(x, y)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.show()
 
-
-
-# outControl = output.output()
-a = mapParse.mapParse()
-b = secParse.secParse(a)
-b.getState()
-b.benchState[0][4]=2
-print(b.getBench_id_goodnum_goodState(0,1))
-# car0=car.car(0)
-# car1=car.car(1)
-# car2=car.car(2)
-# car3=car.car(3)
-#
-# #第一帧
-# b.getState()
-# car0.getState(b.carState[0])#可能是第一行把(maybe
-# car1.getState(b.carState[1])
-# car2.getState(b.carState[2])
-# car3.getState(b.carState[3])
-#
-# #做决策
-# #比如0车去1,1买2  3车去3,5卖6
-# outControl.putTime(b.time)
-#
-# speed,wspeed,lasttime=car0.destination(1,1)
-# outControl.putForward(0,speed)
-# outControl.putRotate(0,wspeed)
-# outControl.putBuy(0)
-#
-# speed,wspeed,lasttime=car3.destination(3,5)
-# outControl.putForward(3,speed)
-# outControl.putRotate(3,wspeed)
-# outControl.putSell(3)
-#
-#
-# outControl.send()
-# #第一帧结束
