@@ -9,6 +9,7 @@ class car:
         self.rotateLimitGo = 1.25# 启动临界角度1.25 在使用碰撞控制后不再被需要，，对于近距离的运送，大角度的转弯 可以优化一份针对性的算法，在没有针对性算法前补偿使用
         self.to0speed=0.75#一针到0的速度
         self.stopRotate=0.17#停止临界
+        self.closeDesBench=1.0  #判断是否是近距离寻路
         #常量区
         self.carid = car_id
         self.benchid = -1
@@ -55,11 +56,15 @@ class car:
         self.des_y = y
         self.distance2des=distance
 
-
-        wspeed = self.rotate()
-        speed = self.straight()
-        lasttime = self.lastTime()
-        return speed, wspeed, lasttime
+        if False:   #判断条件为self.distance2des < self.closeDesBench，接上时修改
+            pass
+            speed, wspeed, lasttime=self.calculate_close_speed(1,1,1)
+            # return speed,wspeed,lasttime
+        else:
+            wspeed = self.rotate()
+            speed = self.straight()
+            lasttime = self.lastTime()
+            return speed, wspeed, lasttime
 
     def rotate(self):
         if self.distance2des<=self.inbench:
@@ -130,5 +135,14 @@ class car:
             else:
                 T = -np.pi / 2
         return T
+
+
+
+    def calculate_close_speed(x, y, other):
+        speed = 1
+        wspeed = 1
+        lasttime=1#这个估算
+        return speed, wspeed,lasttime
+
     def decSpeed(self):
         pass
