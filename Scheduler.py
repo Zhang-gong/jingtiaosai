@@ -158,9 +158,17 @@ class Scheduler:
         self.t_car1 = [[5, 1], [25, 25], [49, 4]]
         self.t_car2 = [[21, 10], [20, 2], [30, 3]]
 
+        self.edge_up = 47
+        self.edge_down = 3
+        self.edge_left = 3
+        self.edge_right = 47
+        self.distance_threshold = 0.9
+
     def update(self):
         # ("请输入每一帧的地图信息：\n")
         self.outControl.putTime(self.sec_map_parse.time)
+        if int(self.sec_map_parse.time) > 8750:
+            TASK_LIST.clear()
         self.sec_map_parse.getState()
         self.update_car_info()
         if self.mode:
@@ -177,8 +185,8 @@ class Scheduler:
 
     def additional_task(self):
         while len(self.crashControler.avoidCrashTaskList) > 0:
-            with open('Log/data_log.txt', 'a') as f:
-                f.write("!!!!!!!!!!!!\n")
+            # with open('Log/data_log.txt', 'a') as f:
+            #     f.write("!!!!!!!!!!!!\n")
             crash_list = self.crashControler.avoidCrashTaskList.pop(0)
             if crash_list[1] > 49.75:
                 crash_list[1] = 50.0
@@ -247,6 +255,20 @@ class Scheduler:
         每个task_list_manager的一个元素就是一组任务
         :return:
         """
+        if int(self.sec_map_parse.time) > 7499:
+            tmp_list = []
+            for i in range(len(TASK_LIST)):
+                if TASK_LIST[i][0] > 3:
+                    tmp_list.append(TASK_LIST[i])
+            for i in range(len(tmp_list)):
+                TASK_LIST.remove(tmp_list[i])
+            # with open('Log/data_log.txt', 'a') as f:
+            #     for task in TASK_LIST:
+            #         f.write("left task from %d tp %d \n" % (task[0], task[1]))
+            for task_list in self.task_list_manager:
+                if len(task_list.senior_task_list) > 1:
+                    self.task_list_manager.remove(task_list)
+
         if len(self.task_list_manager) == 0:
             t = TaskList()
             self.task_list_manager.append(t)
@@ -267,6 +289,8 @@ class Scheduler:
         更新任务状态
         :return:
         """
+        if len(TASK_LIST) == 0:
+            return
         self.update_task_list_manager()
 
         for task_list in self.task_list_manager:
@@ -326,23 +350,66 @@ class Scheduler:
         for i in range(4):
             self.cars[i].getState(self.sec_map_parse.carState[i])
 
+    def check_if_near_edge(self, sub_x, sub_y, c, c_task):
+        # with open('Log/data_log.txt', 'a') as f:
+        #     f.write("now task x = %f, y = %f\n" % (c_task.x, c_task.y))
+        if sub_x < self.distance_threshold < sub_y:
+            if c_task.x < self.edge_left:
+                if c_task.y >= 25:
+                    tmp_task = ready_task(0, 5, c_task.y, 2, 0)
+                    self.cars_task_list[c.carid].insert(0, tmp_task)
+                else:
+                    tmp_task = ready_task(0, 5, c_task.y, 2, 0)
+                    self.cars_task_list[c.carid].insert(0, tmp_task)
+                # with open('Log/data_log.txt', 'a') as f:
+                #     f.write("add tmp task x = %f, y = %f\n" % (tmp_task.x, tmp_task.y))
+            else:
+                if c_task.x > self.edge_right:
+                    if c_task.y >= 25:
+                        tmp_task = ready_task(0, 45, c_task.y, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
+                    else:
+                        tmp_task = ready_task(0, 45, c_task.y, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
+                    # with open('Log/data_log.txt', 'a') as f:
+                    #     f.write("add tmp task x = %f, y = %f\n" % (tmp_task.x, tmp_task.y))
+        if sub_y < self.distance_threshold < sub_x:
+            if c_task.y < self.edge_down:
+                if c_task.x >= 25:
+                    tmp_task = ready_task(0, c_task.x, 5, 2, 0)
+                    self.cars_task_list[c.carid].insert(0, tmp_task)
+                else:
+                    tmp_task = ready_task(0, c_task.x, 5, 2, 0)
+                    self.cars_task_list[c.carid].insert(0, tmp_task)
+                # with open('Log/data_log.txt', 'a') as f:
+                #     f.write("add tmp task x = %f, y = %f\n" % (tmp_task.x, tmp_task.y))
+            else:
+                if c_task.y > self.edge_up:
+                    if c_task.x >= 25:
+                        tmp_task = ready_task(0, c_task.x, 45, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
+                    else:
+                        tmp_task = ready_task(0, c_task.x, 45, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
+                    # with open('Log/data_log.txt', 'a') as f:
+                    #     f.write("add tmp task x = %f, y = %f\n" % (tmp_task.x, tmp_task.y))
+
     def update_cars_state(self):
-        # self.write_to_log()
+        self.write_to_log()
         self.crashControler.putCarState(self.sec_map_parse.carState[:, 4:10])
         for c in self.cars:
             if len(self.cars_task_list[c.carid]) == 0:
                 continue
-            c_task = self.cars_task_list[c.carid][0]
-            sub_x = c_task.x - c.x
-            sub_y = c_task.y - c.y
-            dx = int(abs(sub_x)) * 2
-            dy = int(abs(sub_y)) * 2
+            tmp_task = self.cars_task_list[c.carid][0]
+            sub_x = abs(tmp_task.x - c.x)
+            sub_y = abs(tmp_task.y - c.y)
+            self.check_if_near_edge(sub_x, sub_y, c, tmp_task)
+            dx = int(sub_x) * 2
+            dy = int(sub_y) * 2
             distance = self.sec_map_parse.map[dx][dy]
             if self.cars_busy_state[c.carid]:
-                c_task = self.cars_task_list[c.carid][0]
-                if self.sec_map_parse.time == 5000:
-                    self.f.close()
-                speed, wspeed, lasttime = c.destination(c_task.x, c_task.y, distance)
+                task = self.cars_task_list[c.carid][0]
+                speed, wspeed, lasttime = c.destination(task.x, task.y, distance)
                 self.crashControler.putSportState(c.carid, speed, wspeed)
                 self.crashControler.judgeAndModify()
                 speed, wspeed = self.crashControler.getSportStateAter(c.carid)  # 返回第零个车的修改
@@ -350,20 +417,24 @@ class Scheduler:
                 self.outControl.putRotate(c.carid, wspeed)
             """是否在目标点"""
             if (sub_x * sub_x + sub_y * sub_y) < 0.1:
-                action = c_task.buy_or_sell
+                task = self.cars_task_list[c.carid][0]
+                action = task.buy_or_sell
+                if action == 2:
+                    self.cars_task_list[c.carid].pop(0)
+                    continue
                 if action == 0:
                     self.outControl.putBuy(c.carid)
                     self.cars_task_list[c.carid].pop(0)
-                    if self.start_has_selected.count(c_task.bench_id) > 0:
-                        self.start_has_selected.remove(c_task.bench_id)
+                    if self.start_has_selected.count(task.bench_id) > 0:
+                        self.start_has_selected.remove(task.bench_id)
 
                 else:
                     self.outControl.putSell(c.carid)
                     self.cars_task_list[c.carid].pop(0)
-                    if self.des_has_selected.count(c_task) > 0:
+                    if self.des_has_selected.count(task) > 0:
                         # with open('Log/data_log.txt', 'a') as f:
                         #     f.write("\n SUCCESSFULL POP!!! \n")
-                        self.des_has_selected.remove(c_task)
+                        self.des_has_selected.remove(task)
                     self.cars_busy_state[c.carid] = False
 
             # self.outControl.putForward(c.carid, lasttime)
