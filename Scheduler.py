@@ -158,10 +158,10 @@ class Scheduler:
         self.t_car1 = [[5, 1], [25, 25], [49, 4]]
         self.t_car2 = [[21, 10], [20, 2], [30, 3]]
 
-        self.edge_up = 47
-        self.edge_down = 3
-        self.edge_left = 3
-        self.edge_right = 47
+        self.edge_up = 45
+        self.edge_down = 5
+        self.edge_left = 5
+        self.edge_right = 45
         self.distance_threshold = 0.9
 
     def update(self):
@@ -169,6 +169,7 @@ class Scheduler:
         self.outControl.putTime(self.sec_map_parse.time)
         if int(self.sec_map_parse.time) > 8750:
             TASK_LIST.clear()
+            self.task_list_manager.clear()
         self.sec_map_parse.getState()
         self.update_car_info()
         if self.mode:
@@ -336,10 +337,11 @@ class Scheduler:
             """第j辆车，如果不忙"""
             if len(self.priority_tasks) >= 2:
                 if not self.cars_busy_state[i]:
-                    self.cars_task_list[i].append(self.priority_tasks[0])
-                    self.priority_tasks.pop(0)
-                    self.cars_task_list[i].append(self.priority_tasks[0])
-                    self.priority_tasks.pop(0)
+                    # self.cars_task_list[i].append(self.priority_tasks[0])
+                    tmp_task_1 = self.priority_tasks.pop(0)
+                    # self.cars_task_list[i].append(self.priority_tasks[0])
+                    tmp_task_2 = self.priority_tasks.pop(0)
+                    self.check_if_near_edge(self.cars[i], tmp_task_1, tmp_task_2)
                     self.cars_busy_state[i] = True
 
         for i in range(4):
@@ -350,49 +352,79 @@ class Scheduler:
         for i in range(4):
             self.cars[i].getState(self.sec_map_parse.carState[i])
 
-    def check_if_near_edge(self, sub_x, sub_y, c, c_task):
-        # with open('Log/data_log.txt', 'a') as f:
-        #     f.write("now task x = %f, y = %f\n" % (c_task.x, c_task.y))
-        if sub_x < self.distance_threshold < sub_y:
-            if c_task.x < self.edge_left:
-                if c_task.y >= 25:
-                    tmp_task = ready_task(0, 5, c_task.y, 2, 0)
+    def check_if_near_edge(self, c, tmp_task_1, tmp_task_2):
+        dx_1 = abs(c.x - tmp_task_1.x)
+        dy_1 = abs(c.y - tmp_task_1.y)
+        if dx_1 < self.distance_threshold < dy_1:
+            if tmp_task_1.x < self.edge_left:
+                if tmp_task_1.y > c.y:
+                    tmp_task = ready_task(0, self.edge_left, c.y , 2, 0)
                     self.cars_task_list[c.carid].insert(0, tmp_task)
                 else:
-                    tmp_task = ready_task(0, 5, c_task.y, 2, 0)
+                    tmp_task = ready_task(0, self.edge_left, c.y, 2, 0)
                     self.cars_task_list[c.carid].insert(0, tmp_task)
-                # with open('Log/data_log.txt', 'a') as f:
-                #     f.write("add tmp task x = %f, y = %f\n" % (tmp_task.x, tmp_task.y))
             else:
-                if c_task.x > self.edge_right:
-                    if c_task.y >= 25:
-                        tmp_task = ready_task(0, 45, c_task.y, 2, 0)
+                if tmp_task_1.x > self.edge_right:
+                    if tmp_task_1.y > c.y:
+                        tmp_task = ready_task(0, self.edge_right, c.y, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
                     else:
-                        tmp_task = ready_task(0, 45, c_task.y, 2, 0)
+                        tmp_task = ready_task(0, self.edge_right, c.y, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
-                    # with open('Log/data_log.txt', 'a') as f:
-                    #     f.write("add tmp task x = %f, y = %f\n" % (tmp_task.x, tmp_task.y))
-        if sub_y < self.distance_threshold < sub_x:
-            if c_task.y < self.edge_down:
-                if c_task.x >= 25:
-                    tmp_task = ready_task(0, c_task.x, 5, 2, 0)
+        else:
+            if dy_1 < self.distance_threshold < dx_1:
+                if tmp_task_1.y < self.edge_down:
+                    if tmp_task_1.x > c.x:
+                        tmp_task = ready_task(0, c.x, self.edge_down, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
+                    else:
+                        tmp_task = ready_task(0, c.x, self.edge_down, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
+                else:
+                    if tmp_task_1.y > self.edge_up:
+                        if tmp_task_1.x > c.x:
+                            tmp_task = ready_task(0, c.x, self.edge_up, 2, 0)
+                            self.cars_task_list[c.carid].insert(0, tmp_task)
+                        else:
+                            tmp_task = ready_task(0, c.x, self.edge_up, 2, 0)
+                            self.cars_task_list[c.carid].insert(0, tmp_task)
+        self.cars_task_list[c.carid].append(tmp_task_1)
+        dx_2 = abs(tmp_task_2.x - tmp_task_1.x)
+        dy_2 = abs(tmp_task_2.y - tmp_task_1.y)
+        if dx_2 < self.distance_threshold < dy_2:
+            if tmp_task_2.x < self.edge_left:
+                if tmp_task_2.y > tmp_task_1.y:
+                    tmp_task = ready_task(0, self.edge_left, tmp_task_1.y, 2, 0)
                     self.cars_task_list[c.carid].insert(0, tmp_task)
                 else:
-                    tmp_task = ready_task(0, c_task.x, 5, 2, 0)
+                    tmp_task = ready_task(0, self.edge_left, tmp_task_1.y, 2, 0)
                     self.cars_task_list[c.carid].insert(0, tmp_task)
-                # with open('Log/data_log.txt', 'a') as f:
-                #     f.write("add tmp task x = %f, y = %f\n" % (tmp_task.x, tmp_task.y))
             else:
-                if c_task.y > self.edge_up:
-                    if c_task.x >= 25:
-                        tmp_task = ready_task(0, c_task.x, 45, 2, 0)
+                if tmp_task_2.x > self.edge_right:
+                    if tmp_task_2.y > tmp_task_1.y:
+                        tmp_task = ready_task(0, self.edge_right, tmp_task_1.y, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
                     else:
-                        tmp_task = ready_task(0, c_task.x, 45, 2, 0)
+                        tmp_task = ready_task(0, self.edge_right, tmp_task_1.y, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
-                    # with open('Log/data_log.txt', 'a') as f:
-                    #     f.write("add tmp task x = %f, y = %f\n" % (tmp_task.x, tmp_task.y))
+        else:
+            if dy_1 < self.distance_threshold < dx_1:
+                if tmp_task_2.y < self.edge_down:
+                    if tmp_task_2.x > tmp_task_1.x:
+                        tmp_task = ready_task(0, tmp_task_1.x, self.edge_down, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
+                    else:
+                        tmp_task = ready_task(0, tmp_task_1.x, self.edge_down, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
+                else:
+                    if tmp_task_2.y > self.edge_up:
+                        if tmp_task_2.x > tmp_task_1.x:
+                            tmp_task = ready_task(0, tmp_task_1.x, self.edge_up, 2, 0)
+                            self.cars_task_list[c.carid].insert(0, tmp_task)
+                        else:
+                            tmp_task = ready_task(0, tmp_task_1.x, self.edge_up, 2, 0)
+                            self.cars_task_list[c.carid].insert(0, tmp_task)
+        self.cars_task_list[c.carid].append(tmp_task_2)
 
     def update_cars_state(self):
         self.write_to_log()
@@ -403,7 +435,6 @@ class Scheduler:
             tmp_task = self.cars_task_list[c.carid][0]
             sub_x = abs(tmp_task.x - c.x)
             sub_y = abs(tmp_task.y - c.y)
-            self.check_if_near_edge(sub_x, sub_y, c, tmp_task)
             dx = int(sub_x) * 2
             dy = int(sub_y) * 2
             distance = self.sec_map_parse.map[dx][dy]
@@ -519,11 +550,10 @@ class Scheduler:
                 # print("Error,can't find next task, push_back task_1")
                 continue
             else:
+                self.check_if_near_edge(c, tmp_task_1, tmp_task_2)
                 self.start_has_selected.append(tmp_task_1.bench_id)
                 self.des_has_selected.append(tmp_task_2)
                 task_list.primary_task_list.remove(choose)
-                self.cars_task_list[c.carid].append(tmp_task_1)
-                self.cars_task_list[c.carid].append(tmp_task_2)
                 # print('append into car_task_list[%d] two tasks' % c.carid)
                 self.cars_busy_state[c.carid] = True
                 break
