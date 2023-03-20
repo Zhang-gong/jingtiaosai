@@ -167,15 +167,12 @@ class Scheduler:
     def update(self):
         # ("请输入每一帧的地图信息：\n")
         self.outControl.putTime(self.sec_map_parse.time)
-        if 5000 > int(self.sec_map_parse.time) > 4000:
-            with open('Log/data_log.txt', 'a') as f:
-                f.write("frame is : %s \n" % self.sec_map_parse.time)
-                f.write("car %d loc is x = %f y = %f\n" % (self.cars[0].carid, self.cars[0].x, self.cars[0].y))
-                if len(self.cars_task_list[0]) > 0:
-                    f.write("task x = %f, y  = %f\n" % (self.cars_task_list[0][0].x, self.cars_task_list[0][0].y))
-        if int(self.sec_map_parse.time) > 8750:
-            TASK_LIST.clear()
-            self.task_list_manager.clear()
+        # if 5000 > int(self.sec_map_parse.time) > 4000:
+        #     with open('Log/data_log.txt', 'a') as f:
+        #         f.write("frame is : %s \n" % self.sec_map_parse.time)
+        #         f.write("car %d loc is x = %f y = %f\n" % (self.cars[0].carid, self.cars[0].x, self.cars[0].y))
+        #         if len(self.cars_task_list[0]) > 0:
+        #             f.write("task x = %f, y  = %f\n" % (self.cars_task_list[0][0].x, self.cars_task_list[0][0].y))
         self.sec_map_parse.getState()
         self.update_car_info()
         if self.mode:
@@ -262,20 +259,6 @@ class Scheduler:
         每个task_list_manager的一个元素就是一组任务
         :return:
         """
-        if int(self.sec_map_parse.time) > 7499:
-            tmp_list = []
-            for i in range(len(TASK_LIST)):
-                if TASK_LIST[i][0] > 3:
-                    tmp_list.append(TASK_LIST[i])
-            for i in range(len(tmp_list)):
-                TASK_LIST.remove(tmp_list[i])
-            # with open('Log/data_log.txt', 'a') as f:
-            #     for task in TASK_LIST:
-            #         f.write("left task from %d tp %d \n" % (task[0], task[1]))
-            for task_list in self.task_list_manager:
-                if len(task_list.senior_task_list) > 1:
-                    self.task_list_manager.remove(task_list)
-
         if len(self.task_list_manager) == 0:
             t = TaskList()
             self.task_list_manager.append(t)
@@ -359,17 +342,35 @@ class Scheduler:
             self.cars[i].getState(self.sec_map_parse.carState[i])
 
     def check_if_near_edge(self, c, tmp_task_1, tmp_task_2):
-        with open('Log/data_log.txt', 'a') as f:
-            # 写入数据
-            f.write("the frame is %s \n" % self.sec_map_parse.time)
+        # with open('Log/data_log.txt', 'a') as f:
+        #     # 写入数据
+        #     f.write("the frame is %s \n" % self.sec_map_parse.time)
+        remain_time = 9000 - int(self.sec_map_parse.time)
         dx_1 = abs(c.x - tmp_task_1.x)
         dy_1 = abs(c.y - tmp_task_1.y)
-        if dx_1 < self.distance_threshold < dy_1:
+        dx_2 = abs(tmp_task_2.x - tmp_task_1.x)
+        dy_2 = abs(tmp_task_2.y - tmp_task_1.y)
+        dx = int(dx_1) * 2
+        dy = int(dy_1) * 2
+        distance = self.sec_map_parse.map[dx][dy]
+        buy_time = distance/6 + 1
+        dx = int(dx_2) * 2
+        dy = int(dy_2) * 2
+        distance = self.sec_map_parse.map[dx][dy]
+        sell_time = distance/6 + 1
+        with open('Log/data_log.txt', 'a') as f:
+            f.write("need time %f , remain time %d\n" % (buy_time + sell_time, remain_time))
+        need_time = buy_time + sell_time
+        if need_time > (remain_time / 50):
             with open('Log/data_log.txt', 'a') as f:
-                f.write("c to t1_left\n")
+                f.write("don't do it\n")
+            return
+        if dx_1 < self.distance_threshold < dy_1:
+            # with open('Log/data_log.txt', 'a') as f:
+            #     f.write("c to t1_left\n")
             if tmp_task_1.x < self.edge_left:
-                with open('Log/data_log.txt', 'a') as f:
-                    f.write("1\n")
+                # with open('Log/data_log.txt', 'a') as f:
+                #     f.write("1\n")
                 if tmp_task_1.y > c.y:
                     tmp_task = ready_task(0, self.edge_left, c.y, 2, 0)
                     self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -378,8 +379,8 @@ class Scheduler:
                     self.cars_task_list[c.carid].insert(0, tmp_task)
             else:
                 if tmp_task_1.x > self.edge_right:
-                    with open('Log/data_log.txt', 'a') as f:
-                        f.write("2\n")
+                    # with open('Log/data_log.txt', 'a') as f:
+                    #     f.write("2\n")
                     if tmp_task_1.y > c.y:
                         tmp_task = ready_task(0, self.edge_right, c.y, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -388,11 +389,11 @@ class Scheduler:
                         self.cars_task_list[c.carid].insert(0, tmp_task)
         else:
             if dy_1 < self.distance_threshold < dx_1:
-                with open('Log/data_log.txt', 'a') as f:
-                    f.write("c %d to t1 down\n" % c.carid)
+                # with open('Log/data_log.txt', 'a') as f:
+                #     f.write("c %d to t1 down\n" % c.carid)
                 if tmp_task_1.y < self.edge_down:
-                    with open('Log/data_log.txt', 'a') as f:
-                        f.write("3\n")
+                    # with open('Log/data_log.txt', 'a') as f:
+                    #     f.write("3\n")
                     if tmp_task_1.x > c.x:
                         tmp_task = ready_task(0, c.x, self.edge_down, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -401,8 +402,8 @@ class Scheduler:
                         self.cars_task_list[c.carid].insert(0, tmp_task)
                 else:
                     if tmp_task_1.y > self.edge_up:
-                        with open('Log/data_log.txt', 'a') as f:
-                            f.write("c.carid = %d , des is %d\n 4\n" % (c.carid, tmp_task_1.bench_type))
+                        # with open('Log/data_log.txt', 'a') as f:
+                        #     f.write("c.carid = %d , des is %d\n 4\n" % (c.carid, tmp_task_1.bench_type))
                         if tmp_task_1.x > c.x:
                             tmp_task = ready_task(0, c.x, self.edge_up, 2, 0)
                             self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -410,14 +411,12 @@ class Scheduler:
                             tmp_task = ready_task(0, c.x, self.edge_up, 2, 0)
                             self.cars_task_list[c.carid].insert(0, tmp_task)
         self.cars_task_list[c.carid].append(tmp_task_1)
-        dx_2 = abs(tmp_task_2.x - tmp_task_1.x)
-        dy_2 = abs(tmp_task_2.y - tmp_task_1.y)
         if dx_2 < self.distance_threshold < dy_2:
-            with open('Log/data_log.txt', 'a') as f:
-                f.write("t1 to t2 left\n")
+            # with open('Log/data_log.txt', 'a') as f:
+            #     f.write("t1 to t2 left\n")
             if tmp_task_2.x < self.edge_left:
-                with open('Log/data_log.txt', 'a') as f:
-                    f.write("5\n")
+                # with open('Log/data_log.txt', 'a') as f:
+                #     f.write("5\n")
                 if tmp_task_2.y > tmp_task_1.y:
                     tmp_task = ready_task(0, self.edge_left, tmp_task_1.y, 2, 0)
                     self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -426,8 +425,8 @@ class Scheduler:
                     self.cars_task_list[c.carid].insert(0, tmp_task)
             else:
                 if tmp_task_2.x > self.edge_right:
-                    with open('Log/data_log.txt', 'a') as f:
-                        f.write("6\n")
+                    # with open('Log/data_log.txt', 'a') as f:
+                    #     f.write("6\n")
                     if tmp_task_2.y > tmp_task_1.y:
                         tmp_task = ready_task(0, self.edge_right, tmp_task_1.y, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -436,11 +435,11 @@ class Scheduler:
                         self.cars_task_list[c.carid].insert(0, tmp_task)
         else:
             if dy_2 < self.distance_threshold < dx_2:
-                with open('Log/data_log.txt', 'a') as f:
-                    f.write("t1 to t2 down\n")
+                # with open('Log/data_log.txt', 'a') as f:
+                #     f.write("t1 to t2 down\n")
                 if tmp_task_2.y < self.edge_down:
-                    with open('Log/data_log.txt', 'a') as f:
-                        f.write("7\n")
+                    # with open('Log/data_log.txt', 'a') as f:
+                    #     f.write("7\n")
                     if tmp_task_2.x > tmp_task_1.x:
                         tmp_task = ready_task(0, tmp_task_1.x, self.edge_down, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -449,8 +448,8 @@ class Scheduler:
                         self.cars_task_list[c.carid].insert(0, tmp_task)
                 else:
                     if tmp_task_2.y > self.edge_up:
-                        with open('Log/data_log.txt', 'a') as f:
-                            f.write("c.carid = %d , des is %d\n 8\n" % (c.carid, tmp_task_2.bench_type))
+                        # with open('Log/data_log.txt', 'a') as f:
+                        #     f.write("c.carid = %d , des is %d\n 8\n" % (c.carid, tmp_task_2.bench_type))
                         if tmp_task_2.x > tmp_task_1.x:
                             tmp_task = ready_task(0, tmp_task_1.x, self.edge_up, 2, 0)
                             self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -487,6 +486,8 @@ class Scheduler:
                     self.cars_task_list[c.carid].pop(0)
                     continue
                 if action == 0:
+                    if int(self.sec_map_parse.getBench_id_last(int(task.bench_id))) > 0:
+                        return
                     self.outControl.putBuy(c.carid)
                     self.cars_task_list[c.carid].pop(0)
                     if self.start_has_selected.count(task.bench_id) > 0:
