@@ -158,11 +158,11 @@ class Scheduler:
         self.t_car1 = [[5, 1], [25, 25], [49, 4]]
         self.t_car2 = [[21, 10], [20, 2], [30, 3]]
 
-        self.edge_up = 45
-        self.edge_down = 5
-        self.edge_left = 5
-        self.edge_right = 45
-        self.distance_threshold = 0.9
+        self.edge_up = 48
+        self.edge_down = 2
+        self.edge_left = 2
+        self.edge_right = 48
+        self.distance_threshold = 1
 
     def update(self):
         # ("请输入每一帧的地图信息：\n")
@@ -353,10 +353,17 @@ class Scheduler:
             self.cars[i].getState(self.sec_map_parse.carState[i])
 
     def check_if_near_edge(self, c, tmp_task_1, tmp_task_2):
+        with open('Log/data_log.txt', 'a') as f:
+            # 写入数据
+            f.write("the frame is %s \n" % self.sec_map_parse.time)
         dx_1 = abs(c.x - tmp_task_1.x)
         dy_1 = abs(c.y - tmp_task_1.y)
         if dx_1 < self.distance_threshold < dy_1:
+            with open('Log/data_log.txt', 'a') as f:
+                f.write("c to t1_left\n")
             if tmp_task_1.x < self.edge_left:
+                with open('Log/data_log.txt', 'a') as f:
+                    f.write("1\n")
                 if tmp_task_1.y > c.y:
                     tmp_task = ready_task(0, self.edge_left, c.y , 2, 0)
                     self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -365,6 +372,8 @@ class Scheduler:
                     self.cars_task_list[c.carid].insert(0, tmp_task)
             else:
                 if tmp_task_1.x > self.edge_right:
+                    with open('Log/data_log.txt', 'a') as f:
+                        f.write("2\n")
                     if tmp_task_1.y > c.y:
                         tmp_task = ready_task(0, self.edge_right, c.y, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -373,7 +382,11 @@ class Scheduler:
                         self.cars_task_list[c.carid].insert(0, tmp_task)
         else:
             if dy_1 < self.distance_threshold < dx_1:
+                with open('Log/data_log.txt', 'a') as f:
+                    f.write("c %d to t1 down\n" % c.carid)
                 if tmp_task_1.y < self.edge_down:
+                    with open('Log/data_log.txt', 'a') as f:
+                        f.write("3\n")
                     if tmp_task_1.x > c.x:
                         tmp_task = ready_task(0, c.x, self.edge_down, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -382,6 +395,8 @@ class Scheduler:
                         self.cars_task_list[c.carid].insert(0, tmp_task)
                 else:
                     if tmp_task_1.y > self.edge_up:
+                        with open('Log/data_log.txt', 'a') as f:
+                            f.write("4\n")
                         if tmp_task_1.x > c.x:
                             tmp_task = ready_task(0, c.x, self.edge_up, 2, 0)
                             self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -392,7 +407,11 @@ class Scheduler:
         dx_2 = abs(tmp_task_2.x - tmp_task_1.x)
         dy_2 = abs(tmp_task_2.y - tmp_task_1.y)
         if dx_2 < self.distance_threshold < dy_2:
+            with open('Log/data_log.txt', 'a') as f:
+                f.write("t1 to t2 left\n")
             if tmp_task_2.x < self.edge_left:
+                with open('Log/data_log.txt', 'a') as f:
+                    f.write("5\n")
                 if tmp_task_2.y > tmp_task_1.y:
                     tmp_task = ready_task(0, self.edge_left, tmp_task_1.y, 2, 0)
                     self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -401,6 +420,8 @@ class Scheduler:
                     self.cars_task_list[c.carid].insert(0, tmp_task)
             else:
                 if tmp_task_2.x > self.edge_right:
+                    with open('Log/data_log.txt', 'a') as f:
+                        f.write("6\n")
                     if tmp_task_2.y > tmp_task_1.y:
                         tmp_task = ready_task(0, self.edge_right, tmp_task_1.y, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -408,8 +429,12 @@ class Scheduler:
                         tmp_task = ready_task(0, self.edge_right, tmp_task_1.y, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
         else:
-            if dy_1 < self.distance_threshold < dx_1:
+            if dy_2 < self.distance_threshold < dx_2:
+                with open('Log/data_log.txt', 'a') as f:
+                    f.write("t1 to t2 down\n")
                 if tmp_task_2.y < self.edge_down:
+                    with open('Log/data_log.txt', 'a') as f:
+                        f.write("7\n")
                     if tmp_task_2.x > tmp_task_1.x:
                         tmp_task = ready_task(0, tmp_task_1.x, self.edge_down, 2, 0)
                         self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -418,6 +443,8 @@ class Scheduler:
                         self.cars_task_list[c.carid].insert(0, tmp_task)
                 else:
                     if tmp_task_2.y > self.edge_up:
+                        with open('Log/data_log.txt', 'a') as f:
+                            f.write("8\n")
                         if tmp_task_2.x > tmp_task_1.x:
                             tmp_task = ready_task(0, tmp_task_1.x, self.edge_up, 2, 0)
                             self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -427,7 +454,7 @@ class Scheduler:
         self.cars_task_list[c.carid].append(tmp_task_2)
 
     def update_cars_state(self):
-        self.write_to_log()
+        #self.write_to_log()
         self.crashControler.putCarState(self.sec_map_parse.carState[:, 4:10])
         for c in self.cars:
             if len(self.cars_task_list[c.carid]) == 0:
