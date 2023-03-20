@@ -92,10 +92,10 @@ class car:
             return -np.pi
         elif dT<=-self.rotateLimitAc:
             return np.pi
-        elif dT>self.stopRotate:
+        elif abs(dT)>self.stopRotate:
             return -np.sign(dT)*self.to0speed
         else:
-            return dT
+            return -dT
 
 
     def straight(self):

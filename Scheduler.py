@@ -167,6 +167,12 @@ class Scheduler:
     def update(self):
         # ("请输入每一帧的地图信息：\n")
         self.outControl.putTime(self.sec_map_parse.time)
+        if 5000 > int(self.sec_map_parse.time) > 4000:
+            with open('Log/data_log.txt', 'a') as f:
+                f.write("frame is : %s \n" % self.sec_map_parse.time)
+                f.write("car %d loc is x = %f y = %f\n" % (self.cars[0].carid, self.cars[0].x, self.cars[0].y))
+                if len(self.cars_task_list[0]) > 0:
+                    f.write("task x = %f, y  = %f\n" % (self.cars_task_list[0][0].x, self.cars_task_list[0][0].y))
         if int(self.sec_map_parse.time) > 8750:
             TASK_LIST.clear()
             self.task_list_manager.clear()
@@ -365,7 +371,7 @@ class Scheduler:
                 with open('Log/data_log.txt', 'a') as f:
                     f.write("1\n")
                 if tmp_task_1.y > c.y:
-                    tmp_task = ready_task(0, self.edge_left, c.y , 2, 0)
+                    tmp_task = ready_task(0, self.edge_left, c.y, 2, 0)
                     self.cars_task_list[c.carid].insert(0, tmp_task)
                 else:
                     tmp_task = ready_task(0, self.edge_left, c.y, 2, 0)
@@ -396,7 +402,7 @@ class Scheduler:
                 else:
                     if tmp_task_1.y > self.edge_up:
                         with open('Log/data_log.txt', 'a') as f:
-                            f.write("4\n")
+                            f.write("c.carid = %d , des is %d\n 4\n" % (c.carid, tmp_task_1.bench_type))
                         if tmp_task_1.x > c.x:
                             tmp_task = ready_task(0, c.x, self.edge_up, 2, 0)
                             self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -444,7 +450,7 @@ class Scheduler:
                 else:
                     if tmp_task_2.y > self.edge_up:
                         with open('Log/data_log.txt', 'a') as f:
-                            f.write("8\n")
+                            f.write("c.carid = %d , des is %d\n 8\n" % (c.carid, tmp_task_2.bench_type))
                         if tmp_task_2.x > tmp_task_1.x:
                             tmp_task = ready_task(0, tmp_task_1.x, self.edge_up, 2, 0)
                             self.cars_task_list[c.carid].insert(0, tmp_task)
@@ -454,7 +460,7 @@ class Scheduler:
         self.cars_task_list[c.carid].append(tmp_task_2)
 
     def update_cars_state(self):
-        #self.write_to_log()
+        # self.write_to_log()
         self.crashControler.putCarState(self.sec_map_parse.carState[:, 4:10])
         for c in self.cars:
             if len(self.cars_task_list[c.carid]) == 0:
