@@ -239,10 +239,10 @@ class Scheduler:
                 self.t_car2.pop(0)
 
     def get_map_info(self):
-        if os.path.exists('Log/data_log.txt'):
-            os.remove('Log/data_log.txt')
-        with open('Log/data_log.txt', 'w') as f:
-            f.write("__init__\n")
+        # if os.path.exists('Log/data_log.txt'):
+        #     os.remove('Log/data_log.txt')
+        # with open('Log/data_log.txt', 'w') as f:
+        #     f.write("__init__\n")
         # print("请输入初始地图：\n")
         self.map_parse = mapParse.mapParse()
         self.sec_map_parse = secParse.secParse(self.map_parse)
@@ -358,12 +358,12 @@ class Scheduler:
         dy = int(dy_2) * 2
         distance = self.sec_map_parse.map[dx][dy]
         sell_time = distance/6 + 1
-        with open('Log/data_log.txt', 'a') as f:
-            f.write("need time %f , remain time %d\n" % (buy_time + sell_time, remain_time))
+        # with open('Log/data_log.txt', 'a') as f:
+        #     f.write("need time %f , remain time %d\n" % (buy_time + sell_time, remain_time))
         need_time = buy_time + sell_time
         if need_time > (remain_time / 50):
-            with open('Log/data_log.txt', 'a') as f:
-                f.write("don't do it\n")
+            # with open('Log/data_log.txt', 'a') as f:
+            #     f.write("don't do it\n")
             return
         if dx_1 < self.distance_threshold < dy_1:
             # with open('Log/data_log.txt', 'a') as f:

@@ -1,5 +1,8 @@
 #!/bin/bash
 import sys
+
+# import win32api
+
 import mapParse
 import time
 import secParse
@@ -23,12 +26,12 @@ if __name__ == '__main__':
 
 
     # pid = win32api.GetCurrentProcessId()
-    #with open('1.txt', 'w') as f:
+    # with open('1.txt', 'w') as f:
     #    # 获取当前进程的PID
     #    # 将PID写入文件中
     #    f.write(str(pid))
     #    f.close()
-    #time.sleep(24) #用于查看pid附加进程
+    # time.sleep(24) #用于查看pid附加进程
     scheduler = Scheduler()
     scheduler.get_map_info()
 
