@@ -5,7 +5,7 @@ import sys
 class car:
     def __init__(self, car_id):
         self.inbench=0.0002
-        self.rotateLimitAc=0.12#0.13#加减速临界角度
+        self.rotateLimitAc=0.1#0.13#加减速临界角度
         #self.rotateLimitGo = 1.25# 启动临界角度1.25 在使用碰撞控制后不再被需要，，对于近距离的运送，大角度的转弯 可以优化一份针对性的算法，在没有针对性算法前补偿使用
         self.to0speed=0.75#一针到0的速度
         self.stopRotate=0.17#停止临界
@@ -203,8 +203,6 @@ class car:
             return -np.pi
         elif dT<=-self.rotateLimitAc:
             return np.pi
-        elif dT>self.stopRotate:
-            return -np.sign(dT)*self.to0speed
         else:
             return dT
     def back(self):
