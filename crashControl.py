@@ -113,13 +113,13 @@ class crashControl():
                         self.avoidCrashTaskList.append(
                             [j, xj + dy * self.CollisionFineTuning, yj - dx * self.CollisionFineTuning])
                         self.avoidCrashTaskList.append(
-                            [i, xi - dy * self.CollisionFineTuning, xi + dx * self.CollisionFineTuning])
+                            [i, xi - dy * self.CollisionFineTuning, yi + dx * self.CollisionFineTuning])
                     else:
                         self.sportStateAfter[i][1] = np.pi
                         self.avoidCrashTaskList.append(
                             [j, xj - dy * self.CollisionFineTuning, yj + dx * self.CollisionFineTuning])
                         self.avoidCrashTaskList.append(
-                            [i, xi + dy * self.CollisionFineTuning, xi - dx * self.CollisionFineTuning])
+                            [i, xi + dy * self.CollisionFineTuning, yi - dx * self.CollisionFineTuning])
 
                 self.fineFlag = self.sportStateAfter[i][1] * self.sportStateAfter[j][1]
 
