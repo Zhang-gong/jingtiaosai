@@ -138,6 +138,7 @@ class Scheduler:
             f.write("\n")
 
     def __init__(self):
+
         self.cars = [car.car(i) for i in range(4)]
         self.task_list_manager = []
         self.sec_map_parse = None
@@ -333,6 +334,7 @@ class Scheduler:
                             flag = True
                             # with open('Log/data_log.txt', 'a') as f:
                             #     f.write("FIND 33333\n")
+
                             break
                 if flag:
                     task_list.senior_task_list.remove(senior_task)
@@ -511,33 +513,54 @@ class Scheduler:
     def check_des_task_exist(self, sell_goods_type, des_id):
         for i in range(len(self.des_has_selected)):
             des_task = self.des_has_selected[i]
-            if des_task.bench_id == des_id and sell_goods_type == des_task.bench_type:
+            if int(des_task.bench_id) == int(des_id) and int(sell_goods_type) == int(des_task.bench_type):
                 return False
         return True
 
     def get_des_task(self, tmp_task, task):
-        des_id = self.sec_map_parse.getBench_elsegood_type_id(int(task.des), int(task.from_where), tmp_task.x, tmp_task.y)
-        des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
-        tmp_task_2 = ready_task(task.from_where, float(des_x), float(des_y), 1, des_id)
+        if task.des == 4 or task.des == 5 or task.des == 6 or task.des == 7:
+            des_id = self.sec_map_parse.getBench_elsegood_type_id(int(task.des), int(task.from_where), tmp_task.x,
+                                                                  tmp_task.y)
+            if des_id != -1:
+                if self.check_des_task_exist(task.from_where, des_id):
+                    des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
+                    tmp_task_2 = ready_task(task.from_where, float(des_x), float(des_y), 1, des_id)
+                    return tmp_task_2
+        else:
+            tmp_task_2 = None
+            des_list = self.sec_map_parse.getBench_closest_xy_type_id(tmp_task.x, tmp_task.y, task.des)
+            for des in des_list:
+                des_id = des[0]
+                # with open('Log/data_log.txt', 'a') as f:
+                #     f.write("FIND 2222\n")
+                """获得对应卖的任务,找最近的，缺货的对应工作台"""
+                if not self.sec_map_parse.getBench_id_goodnum_goodState(int(des_id), task.from_where):
+                    #
+                    # with open('Log/data_log.txt', 'a') as f:
+                    #     f.write()
+                    if not self.check_des_task_exist(task.from_where, des_id):
+                        continue
+                    des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
+                    tmp_task_2 = ready_task(task.from_where, float(des_x), float(des_y), 1, des_id)
+                    return tmp_task_2
+
+        tmp_task_2 = None
+        des_list = self.sec_map_parse.getBench_closest_xy_type_id(tmp_task.x, tmp_task.y, task.des)
+        for des in des_list:
+            des_id = des[0]
+            if not self.sec_map_parse.getBench_id_goodnum_goodState(int(des_id), task.from_where):
+                #
+                    # with open('Log/data_log.txt', 'a') as f:
+                    #     f.write()
+                if not self.check_des_task_exist(task.from_where, des_id):
+                    continue
+                des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
+                tmp_task_2 = ready_task(task.from_where, float(des_x), float(des_y), 1, des_id)
+                return tmp_task_2
         return tmp_task_2
-        # tmp_task_2 = None
-        # des_list = self.sec_map_parse.getBench_closest_xy_type_id(tmp_task.x, tmp_task.y, task.des)
-        # for des in des_list:
-        #     des_id = des[0]
-        #     # with open('Log/data_log.txt', 'a') as f:
-        #     #     f.write("FIND 2222\n")
-        #     """获得对应卖的任务,找最近的，缺货的对应工作台"""
-        #     if not self.sec_map_parse.getBench_id_goodnum_goodState(int(des_id), task.from_where):
-        #         #
-        #         # with open('Log/data_log.txt', 'a') as f:
-        #         #     f.write()
-        #         if not self.check_des_task_exist(task.from_where, des_id):
-        #             continue
-        #         des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
-        #         tmp_task_2 = ready_task(task.from_where, float(des_x), float(des_y), 1, des_id)
-        #         return tmp_task_2
-        #
-        # return tmp_task_2
+
+
+
 
     def check_if_exist(self, bench_id):
         if self.start_has_selected.count(bench_id) == 0:
