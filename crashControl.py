@@ -10,11 +10,11 @@ class crashControl():
     def __init__(self):
 
         self.nFrameWall = 4  # 预判帧数 对墙
-        self.nFrameOthers = 9  # 8相互
+        self.nFrameOthers = 15  # 8相互
         self.threshold2others = (0.53 + self.nFrameOthers * 6 / 50) * 2 * 1.414  # 小车中心dx+dy超过这个值被判定为间隔很远
         self.threshold2crash = 1.2 * 1.2  # 判断相撞临界的平方
         self.threshold2angle = np.pi / 5 * 4  # 相撞一般一顺一逆，极端情况同时顺或逆，临界值
-        self.decRate = 5 / 6  # 速度每次降
+        self.decRate = 2 / 3  # 速度每次降
         self.speedWhenRate = 4
         self.r_wall = 2.4
         self.xmax = 50

@@ -156,6 +156,78 @@ class secParse():
 
         # 同时返回标号时间
         pass
+    def getBench_elsegood_type_id(self, target_typel,self_typel,x,y):
+        backid=0
+        """
+
+        :param : 目标工作台带的类型，和自己的类型
+        :xy 当前坐标
+        :return:  返回序号，第一顺序含有其他最多，第二顺序距离
+        
+        """
+
+        if target_typel==7:
+            #如果说目标类型7
+            f_old=0#记录当前选定台的最大材料素 最大3
+            flag = False#如果没找到目标工作台，它有其他材料  为false
+            close_list = self.getBench_closest_xy_type_id(x, y, target_typel)
+            #获取列表，按距离排序，0是id
+            for i in close_list:
+                if self.getBench_id_last(i[0]) == -1:
+                    #他要没生产我才可考虑
+                    if(self_typel==4 or self.getBench_id_goodnum_goodState(i[0], 4)):
+                    #我自己是，或者他有（456统一考虑）
+                        f1=1
+                    else:
+                        f1=0
+                    if (self_typel == 5 or self.getBench_id_goodnum_goodState(i[0], 5)):
+                        f2 = 1
+                    else:
+                        f2 = 0
+                    if (self_typel == 6 or self.getBench_id_goodnum_goodState(i[0], 6)):
+                        f3 = 1
+                    else:
+                        f3 = 0
+                    f=f1+f2+f3
+                    #f 越大越优先考虑，可能有漏洞，暂未想到
+                    if not self.getBench_id_goodnum_goodState(i[0], self_typel):
+                        #目标工作台缺我的话
+                        if f>f_old:
+                            #如果现在这个就绪数量大于我，更新
+                            backid=i[0]
+                            f_old=f
+                            flag = True
+
+
+
+        else:
+            #如果目标类型456，输入注意控制
+            elsegood=target_typel-self_typel-1
+            #我的好伙伴的数字，这个应该没问题
+            flag=False
+            close_list=self.getBench_closest_xy_type_id(x,y,target_typel)
+            #i[0]benchid，同上列表
+            for i in close_list:
+                distance=1
+                if self.getBench_id_last(i[0])==-1 and  self.getBench_id_goodnum_goodState(i[0],elsegood)and not self.getBench_id_goodnum_goodState(i[0],self_typel):
+                    #如果他没生产，他有我的好伙伴，他没我，我就去
+                    flag=True
+                    backid=i
+                    break
+                    # if distance>=20:
+                    #     return 0
+                    #防止被拐卖到偏远山区生产
+        if not flag:
+            #针对456的（7应该不会进来）没找到好伙伴那就挑个最近的没生产的缺我的
+            close_list = self.getBench_closest_xy_type_id(x, y, target_typel)
+            for i in close_list:
+                if self.getBench_id_last(i[0]) == -1 and not self.getBench_id_goodnum_goodState(i[0], self_typel):
+                    backid = i
+                    break
+
+
+        return  backid
+
 
     def getCar_id_benchid(self, id):
         """
