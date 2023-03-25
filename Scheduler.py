@@ -398,22 +398,14 @@ class Scheduler:
                 if tmp_task_1.x < self.edge_left:
                     # with open('Log/data_log.txt', 'a') as f:
                     #     f.write("1\n")
-                    if tmp_task_1.y > c.y:
-                        tmp_task = ready_task(0, self.edge_left, c.y, 2, 0)
-                        self.cars_task_list[c.carid].insert(0, tmp_task)
-                    else:
-                        tmp_task = ready_task(0, self.edge_left, c.y, 2, 0)
-                        self.cars_task_list[c.carid].insert(0, tmp_task)
+                    tmp_task = ready_task(0, self.edge_left, c.y, 2, 0)
+                    self.cars_task_list[c.carid].insert(0, tmp_task)
                 else:
                     if tmp_task_1.x > self.edge_right:
                         # with open('Log/data_log.txt', 'a') as f:
                         #     f.write("2\n")
-                        if tmp_task_1.y > c.y:
-                            tmp_task = ready_task(0, self.edge_right, c.y, 2, 0)
-                            self.cars_task_list[c.carid].insert(0, tmp_task)
-                        else:
-                            tmp_task = ready_task(0, self.edge_right, c.y, 2, 0)
-                            self.cars_task_list[c.carid].insert(0, tmp_task)
+                        tmp_task = ready_task(0, self.edge_right, c.y, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
         else:
             if dy_1 < self.distance_threshold < dx_1:
                 # with open('Log/data_log.txt', 'a') as f:
@@ -422,22 +414,14 @@ class Scheduler:
                     if tmp_task_1.y < self.edge_down:
                         # with open('Log/data_log.txt', 'a') as f:
                         #     f.write("3\n")
-                        if tmp_task_1.x > c.x:
-                            tmp_task = ready_task(0, c.x, self.edge_down, 2, 0)
-                            self.cars_task_list[c.carid].insert(0, tmp_task)
-                        else:
-                            tmp_task = ready_task(0, c.x, self.edge_down, 2, 0)
-                            self.cars_task_list[c.carid].insert(0, tmp_task)
+                        tmp_task = ready_task(0, c.x, self.edge_down, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
                     else:
                         if tmp_task_1.y > self.edge_up:
                             # with open('Log/data_log.txt', 'a') as f:
                             #     f.write("c.carid = %d , des is %d\n 4\n" % (c.carid, tmp_task_1.bench_type))
-                            if tmp_task_1.x > c.x:
-                                tmp_task = ready_task(0, c.x, self.edge_up, 2, 0)
-                                self.cars_task_list[c.carid].insert(0, tmp_task)
-                            else:
-                                tmp_task = ready_task(0, c.x, self.edge_up, 2, 0)
-                                self.cars_task_list[c.carid].insert(0, tmp_task)
+                            tmp_task = ready_task(0, c.x, self.edge_up, 2, 0)
+                            self.cars_task_list[c.carid].insert(0, tmp_task)
 
         self.cars_task_list[c.carid].append(tmp_task_1)
         if dx_2 < self.distance_threshold < dy_2:
@@ -447,22 +431,14 @@ class Scheduler:
                 if tmp_task_2.x < self.edge_left:
                     # with open('Log/data_log.txt', 'a') as f:
                     #     f.write("5\n")
-                    if tmp_task_2.y > tmp_task_1.y:
-                        tmp_task = ready_task(0, self.edge_left, tmp_task_1.y, 2, 0)
-                        self.cars_task_list[c.carid].insert(0, tmp_task)
-                    else:
-                        tmp_task = ready_task(0, self.edge_left, tmp_task_1.y, 2, 0)
-                        self.cars_task_list[c.carid].insert(0, tmp_task)
+                    tmp_task = ready_task(0, self.edge_left, tmp_task_1.y, 2, 0)
+                    self.cars_task_list[c.carid].insert(0, tmp_task)
                 else:
                     if tmp_task_2.x > self.edge_right:
                         # with open('Log/data_log.txt', 'a') as f:
                         #     f.write("6\n")
-                        if tmp_task_2.y > tmp_task_1.y:
-                            tmp_task = ready_task(0, self.edge_right, tmp_task_1.y, 2, 0)
-                            self.cars_task_list[c.carid].insert(0, tmp_task)
-                        else:
-                            tmp_task = ready_task(0, self.edge_right, tmp_task_1.y, 2, 0)
-                            self.cars_task_list[c.carid].insert(0, tmp_task)
+                        tmp_task = ready_task(0, self.edge_right, tmp_task_1.y, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
         else:
             if dy_2 < self.distance_threshold < dx_2:
                 # with open('Log/data_log.txt', 'a') as f:
@@ -471,22 +447,14 @@ class Scheduler:
                     if tmp_task_2.y < self.edge_down:
                         # with open('Log/data_log.txt', 'a') as f:
                         #     f.write("7\n")
-                        if tmp_task_2.x > tmp_task_1.x:
-                            tmp_task = ready_task(0, tmp_task_1.x, self.edge_down, 2, 0)
-                            self.cars_task_list[c.carid].insert(0, tmp_task)
-                        else:
-                            tmp_task = ready_task(0, tmp_task_1.x, self.edge_down, 2, 0)
-                            self.cars_task_list[c.carid].insert(0, tmp_task)
+                        tmp_task = ready_task(0, tmp_task_1.x, self.edge_down, 2, 0)
+                        self.cars_task_list[c.carid].insert(0, tmp_task)
                     else:
                         if tmp_task_2.y > self.edge_up:
                             # with open('Log/data_log.txt', 'a') as f:
                             #     f.write("c.carid = %d , des is %d\n 8\n" % (c.carid, tmp_task_2.bench_type))
-                            if tmp_task_2.x > tmp_task_1.x:
-                                tmp_task = ready_task(0, tmp_task_1.x, self.edge_up, 2, 0)
-                                self.cars_task_list[c.carid].insert(0, tmp_task)
-                            else:
-                                tmp_task = ready_task(0, tmp_task_1.x, self.edge_up, 2, 0)
-                                self.cars_task_list[c.carid].insert(0, tmp_task)
+                            tmp_task = ready_task(0, tmp_task_1.x, self.edge_up, 2, 0)
+                            self.cars_task_list[c.carid].insert(0, tmp_task)
 
         self.cars_task_list[c.carid].append(tmp_task_2)
 
@@ -548,24 +516,28 @@ class Scheduler:
         return True
 
     def get_des_task(self, tmp_task, task):
-        tmp_task_2 = None
-        des_list = self.sec_map_parse.getBench_closest_xy_type_id(tmp_task.x, tmp_task.y, task.des)
-        for des in des_list:
-            des_id = des[0]
-            # with open('Log/data_log.txt', 'a') as f:
-            #     f.write("FIND 2222\n")
-            """获得对应卖的任务,找最近的，缺货的对应工作台"""
-            if not self.sec_map_parse.getBench_id_goodnum_goodState(int(des_id), task.from_where):
-                #
-                # with open('Log/data_log.txt', 'a') as f:
-                #     f.write()
-                if not self.check_des_task_exist(task.from_where, des_id):
-                    continue
-                des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
-                tmp_task_2 = ready_task(task.from_where, float(des_x), float(des_y), 1, des_id)
-                return tmp_task_2
-
+        des_id = self.sec_map_parse.getBench_elsegood_type_id(int(task.des), int(task.from_where), tmp_task.x, tmp_task.y)
+        des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
+        tmp_task_2 = ready_task(task.from_where, float(des_x), float(des_y), 1, des_id)
         return tmp_task_2
+        # tmp_task_2 = None
+        # des_list = self.sec_map_parse.getBench_closest_xy_type_id(tmp_task.x, tmp_task.y, task.des)
+        # for des in des_list:
+        #     des_id = des[0]
+        #     # with open('Log/data_log.txt', 'a') as f:
+        #     #     f.write("FIND 2222\n")
+        #     """获得对应卖的任务,找最近的，缺货的对应工作台"""
+        #     if not self.sec_map_parse.getBench_id_goodnum_goodState(int(des_id), task.from_where):
+        #         #
+        #         # with open('Log/data_log.txt', 'a') as f:
+        #         #     f.write()
+        #         if not self.check_des_task_exist(task.from_where, des_id):
+        #             continue
+        #         des_x, des_y = self.sec_map_parse.getBench_id_loc(int(des_id))
+        #         tmp_task_2 = ready_task(task.from_where, float(des_x), float(des_y), 1, des_id)
+        #         return tmp_task_2
+        #
+        # return tmp_task_2
 
     def check_if_exist(self, bench_id):
         if self.start_has_selected.count(bench_id) == 0:

@@ -173,6 +173,7 @@ class secParse():
             close_list = self.getBench_closest_xy_type_id(x, y, target_typel)
             #获取列表，按距离排序，0是id
             for i in close_list:
+                print(i)
                 if self.getBench_id_last(i[0]) == -1:
                     #他要没生产我才可考虑
                     if(self_typel==4 or self.getBench_id_goodnum_goodState(i[0], 4)):
